@@ -1,0 +1,12 @@
+[
+  {
+    "file": "scimplify_erd.html",
+    "name": "Scimplify DB ERD",
+    "desc": "Understanding database architecture and structure",
+    "order": 1
+  },
+  {
+    "file": "starter.html",
+    "order": 2
+  }
+]
