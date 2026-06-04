@@ -3,16 +3,12 @@
     "file": "scimplify_erd.html",
     "name": "Scimplify - DB ERD",
     "desc": "Understanding database architecture and structure",
-    "order": 1
-  },
-  {
-    "file": "starter.html",
-    "order": 3
+    "order": 2
   },
   {
     "file": "scimplify_onboarding.html",
     "name": "Scimplify - New Joiner Guide",
     "desc": "Understanding Scimplify: product overview guide",
-    "order": 2
+    "order": 1
   }
 ]
