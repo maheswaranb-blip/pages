@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scimplify — New Joiner Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal:#0f6e56;--teal-lt:#e1f5ee;--teal-md:#1d9e75;
+    --amber:#ba7517;--amber-lt:#faeeda;--amber-dk:#633806;
+    --purple:#534ab7;--purple-lt:#eeedfe;
+    --coral:#993c1d;--coral-lt:#faece7;
+    --blue:#185fa5;--blue-lt:#e6f1fb;
+    --green:#3b6d11;--green-lt:#eaf3de;
+    --gray:#5f5e5a;--gray-lt:#f1efe8;--gray-dk:#2c2c2a;
+    --red:#a32d2d;--red-lt:#fcebeb;
+    --text:#1a1a18;--muted:#5f5e5a;
+    --border:#e0ddd5;--bg:#fafaf8;--white:#ffffff;
+    --radius:12px;--radius-sm:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;}
+
+  /* HERO */
+  .hero{background:var(--gray-dk);color:#fff;padding:64px 48px 52px;position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,.02) 40px,rgba(255,255,255,.02) 41px);}
+  .hero-tag{display:inline-block;background:var(--teal);color:#fff;font-family:'Sora',sans-serif;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:18px;}
+  .hero h1{font-family:'Sora',sans-serif;font-size:42px;font-weight:700;line-height:1.15;margin-bottom:12px;}
+  .hero h1 span{color:#5DCAA5;}
+  .hero p{font-size:16px;color:rgba(255,255,255,.65);max-width:560px;}
+  .hero-meta{display:flex;gap:32px;margin-top:32px;flex-wrap:wrap;}
+  .hero-meta-item{display:flex;flex-direction:column;}
+  .hero-meta-item .val{font-family:'Sora',sans-serif;font-size:22px;font-weight:700;color:#5DCAA5;}
+  .hero-meta-item .lbl{font-size:12px;color:rgba(255,255,255,.5);}
+
+  /* NAV */
+  .nav-pills{display:flex;gap:8px;padding:20px 48px;background:var(--white);border-bottom:1px solid var(--border);overflow-x:auto;position:sticky;top:0;z-index:100;}
+  .nav-pills a{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;padding:6px 14px;border-radius:20px;border:1px solid var(--border);color:var(--muted);text-decoration:none;white-space:nowrap;transition:all .15s;}
+  .nav-pills a:hover{background:var(--teal-lt);color:var(--teal);border-color:var(--teal-md);}
+  .nav-pills a .dot{width:7px;height:7px;border-radius:50%;}
+
+  /* LAYOUT */
+  .container{max-width:900px;margin:0 auto;padding:52px 32px;}
+  .section{margin-bottom:64px;}
+  .section-header{display:flex;align-items:center;gap:14px;margin-bottom:24px;}
+  .section-badge{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:14px;font-weight:700;flex-shrink:0;}
+  .section h2{font-family:'Sora',sans-serif;font-size:22px;font-weight:700;}
+  p.lead{font-size:15px;color:var(--muted);margin-bottom:16px;}
+
+  /* CARDS */
+  .card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:24px;}
+  .card-grid{display:grid;gap:16px;}
+  .card-grid-2{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
+  .card-grid-3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));}
+  .card-grid-4{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));}
+
+  /* APP CARDS */
+  .app-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;gap:10px;transition:box-shadow .15s,transform .15s;}
+  .app-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.07);transform:translateY(-2px);}
+  .app-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:18px;font-weight:800;}
+  .app-name{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;}
+  .app-url{font-size:11px;color:var(--muted);font-family:monospace;}
+  .app-desc{font-size:13px;color:var(--muted);line-height:1.5;}
+  .app-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+  .tag{font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;}
+
+  /* TABLES */
+  .tbl{width:100%;border-collapse:collapse;font-size:13px;}
+  .tbl th{background:var(--gray-lt);padding:10px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);}
+  .tbl td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+  .tbl tr:last-child td{border-bottom:none;}
+  .tbl-wrap{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+
+  /* WHO TABLE */
+  .who-row{display:grid;grid-template-columns:160px 1fr 1fr;border-bottom:1px solid var(--border);}
+  .who-row:last-child{border-bottom:none;}
+  .who-cell{padding:14px 16px;font-size:13px;}
+  .who-cell.role{font-weight:600;font-family:'Sora',sans-serif;font-size:13px;display:flex;align-items:center;gap:8px;}
+  .who-head{background:var(--gray-lt);border-radius:var(--radius-sm) var(--radius-sm) 0 0;}
+  .who-head .who-cell{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:10px 16px;}
+
+  /* REQUEST CARDS */
+  .req-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;display:flex;flex-direction:column;gap:6px;}
+  .req-title{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;}
+  .req-sub{font-size:12px;color:var(--muted);}
+  .req-stages{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+  .stage-pill{font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid;}
+
+  /* TIMELINE */
+  .timeline{display:flex;flex-direction:column;}
+  .tl-item{display:grid;grid-template-columns:32px 1fr;gap:0 16px;}
+  .tl-left{display:flex;flex-direction:column;align-items:center;}
+  .tl-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:'Sora',sans-serif;flex-shrink:0;}
+  .tl-line{width:2px;flex:1;background:var(--border);margin:4px 0;min-height:20px;}
+  .tl-content{padding-bottom:20px;}
+  .tl-title{font-weight:600;font-size:14px;margin-bottom:3px;}
+  .tl-desc{font-size:13px;color:var(--muted);}
+
+  /* MATCH SCORE */
+  .score-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+  .score-row:last-child{border-bottom:none;}
+  .score-bar-wrap{flex:1;height:8px;background:var(--gray-lt);border-radius:4px;overflow:hidden;}
+  .score-bar{height:100%;border-radius:4px;}
+  .score-label{font-size:13px;font-weight:500;min-width:180px;}
+  .score-pct{font-family:'Sora',sans-serif;font-size:14px;font-weight:700;min-width:40px;text-align:right;}
+
+  /* CALLOUTS */
+  .callout{border-left:4px solid;border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:14px 18px;margin:16px 0;font-size:14px;}
+  .callout.info{border-color:var(--blue);background:var(--blue-lt);color:var(--blue);}
+  .callout.warn{border-color:var(--amber);background:var(--amber-lt);color:var(--amber-dk);}
+  .callout.success{border-color:var(--teal);background:var(--teal-lt);color:var(--teal);}
+  .callout.purple{border-color:var(--purple);background:var(--purple-lt);color:var(--purple);}
+  .callout strong{font-weight:600;}
+
+  /* STAGE COLORS VISUAL */
+  .color-demo{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;}
+  .color-chip{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;border:1px solid;}
+
+  /* DIVIDER */
+  .divider{height:1px;background:var(--border);margin:48px 0;}
+
+  /* HEADER STRUCTURE */
+  .header-row{display:grid;grid-template-columns:40px 1fr;gap:16px;align-items:start;padding:14px 0;border-bottom:1px solid var(--border);}
+  .header-row:last-child{border-bottom:none;}
+  .header-num{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:13px;font-weight:700;flex-shrink:0;}
+  .header-content .h-title{font-weight:600;font-size:14px;margin-bottom:4px;}
+  .header-content .h-desc{font-size:13px;color:var(--muted);}
+
+  /* PERM TABLE */
+  .perm-check{color:var(--teal);font-weight:700;}
+  .perm-cross{color:#ccc;}
+  .perm-partial{color:var(--amber);font-weight:500;}
+
+  /* FOOTER */
+  .footer{background:var(--gray-lt);border-top:1px solid var(--border);text-align:center;padding:32px;font-size:13px;color:var(--muted);}
+  .footer strong{color:var(--text);}
+
+  /* TOC */
+  .toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:40px;}
+  .toc-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);text-decoration:none;padding:4px 0;}
+  .toc-item:hover{color:var(--teal);}
+  .toc-num{font-family:'Sora',sans-serif;font-weight:700;font-size:11px;color:var(--teal);min-width:20px;}
+
+  @media(max-width:600px){
+    .hero{padding:40px 24px 36px;}
+    .hero h1{font-size:28px;}
+    .container{padding:36px 20px;}
+    .nav-pills{padding:14px 20px;}
+    .who-row{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">New Joiner Guide — Complete Edition</div>
+  <h1>Welcome to <span>Scimplify</span></h1>
+  <p>A zero-to-hero guide covering every module, request type, and workflow — built directly from internal product docs. Read this once and you'll know how the platform works end-to-end.</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item"><span class="val">4</span><span class="lbl">Apps</span></div>
+    <div class="hero-meta-item"><span class="val">3</span><span class="lbl">Stakeholders</span></div>
+    <div class="hero-meta-item"><span class="val">6</span><span class="lbl">Request Types</span></div>
+    <div class="hero-meta-item"><span class="val">3</span><span class="lbl">Project Types</span></div>
+    <div class="hero-meta-item"><span class="val">2</span><span class="lbl">Match Score Systems</span></div>
+    <div class="hero-meta-item"><span class="val">8</span><span class="lbl">Role Types</span></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav-pills">
+  <a href="#what"><span class="dot" style="background:#1d9e75"></span>What is it?</a>
+  <a href="#apps"><span class="dot" style="background:#534ab7"></span>4 Apps</a>
+  <a href="#who"><span class="dot" style="background:#ba7517"></span>Stakeholders</a>
+  <a href="#requests"><span class="dot" style="background:#993c1d"></span>6 Request Types</a>
+  <a href="#stages"><span class="dot" style="background:#185fa5"></span>Stage Colors</a>
+  <a href="#projects"><span class="dot" style="background:#0f6e56"></span>Projects</a>
+  <a href="#project-structure"><span class="dot" style="background:#534ab7"></span>Project Structure</a>
+  <a href="#views"><span class="dot" style="background:#3b6d11"></span>Who Sees What</a>
+  <a href="#lifecycle"><span class="dot" style="background:#ba7517"></span>Full Lifecycle</a>
+  <a href="#scoring"><span class="dot" style="background:#993c1d"></span>Match Scores</a>
+  <a href="#roles"><span class="dot" style="background:#5f5e5a"></span>Roles</a>
+</nav>
+
+<div class="container">
+
+  <!-- TABLE OF CONTENTS -->
+  <div class="toc">
+    <a class="toc-item" href="#what"><span class="toc-num">01</span>What is Scimplify?</a>
+    <a class="toc-item" href="#apps"><span class="toc-num">02</span>The 4 Apps</a>
+    <a class="toc-item" href="#who"><span class="toc-num">03</span>Stakeholders</a>
+    <a class="toc-item" href="#requests"><span class="toc-num">04</span>6 Request Types (with forms)</a>
+    <a class="toc-item" href="#stages"><span class="toc-num">05</span>Stage Color System</a>
+    <a class="toc-item" href="#projects"><span class="toc-num">06</span>What is a Project?</a>
+    <a class="toc-item" href="#project-structure"><span class="toc-num">07</span>Project Detail Structure</a>
+    <a class="toc-item" href="#views"><span class="toc-num">08</span>Who Sees What</a>
+    <a class="toc-item" href="#lifecycle"><span class="toc-num">09</span>Full Lifecycle</a>
+    <a class="toc-item" href="#scoring"><span class="toc-num">10</span>Match Score Systems</a>
+    <a class="toc-item" href="#roles"><span class="toc-num">11</span>Roles & Permissions</a>
+  </div>
+
+  <!-- ── 01: WHAT IS SCIMPLIFY ── -->
+  <div class="section" id="what">
+    <div class="section-header">
+      <div class="section-badge" style="background:#e1f5ee;color:#0f6e56;">01</div>
+      <h2>What is Scimplify?</h2>
+    </div>
+    <p class="lead">Scimplify is a chemistry & pharmaceutical supply-chain platform. It connects <strong>customers</strong> (pharma/biotech companies who need molecules made or research done) with <strong>suppliers</strong> (research labs and manufacturers who do the work), with Scimplify's internal team orchestrating everything in between.</p>
+
+    <div class="callout success">
+      <strong>One-liner:</strong> Think of it as the operating system for chemical project management — customers post requests, the platform finds and scores the best-fit lab or factory, manages proposals, and tracks delivery.
+    </div>
+
+    <div class="card-grid card-grid-3" style="margin-top:20px">
+      <div class="card" style="border-top:3px solid #1d9e75">
+        <div style="font-size:26px;margin-bottom:8px">🔬</div>
+        <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:15px;margin-bottom:6px">R&D</div>
+        <div style="font-size:13px;color:var(--muted)">Research & development of a new molecule or compound. Handled by CROs via <strong>IONS</strong>.</div>
+      </div>
+      <div class="card" style="border-top:3px solid #ba7517">
+        <div style="font-size:26px;margin-bottom:8px">🏭</div>
+        <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:15px;margin-bottom:6px">CMO</div>
+        <div style="font-size:13px;color:var(--muted)">Contract manufacturing — scaling up production of a known compound. Handled by manufacturers via <strong>ATOMS</strong>.</div>
+      </div>
+      <div class="card" style="border-top:3px solid #534ab7">
+        <div style="font-size:26px;margin-bottom:8px">⚗️</div>
+        <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:15px;margin-bottom:6px">CDMO</div>
+        <div style="font-size:13px;color:var(--muted)">Full service — R&D <em>and</em> manufacturing combined. Uses both <strong>IONS</strong> (R&D stage) and <strong>ATOMS</strong> (manufacturing stage).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 02: THE 4 APPS ── -->
+  <div class="section" id="apps">
+    <div class="section-header">
+      <div class="section-badge" style="background:#eeedfe;color:#534ab7;">02</div>
+      <h2>The 4 Apps</h2>
+    </div>
+    <p class="lead">Scimplify runs as four separate web portals. Same data, different doors — each built for a specific user type.</p>
+
+    <div class="card-grid card-grid-2">
+      <div class="app-card">
+        <div class="app-icon" style="background:#e1f5ee;color:#0f6e56;">N</div>
+        <div class="app-name">Nucleus</div>
+        <div class="app-url">devnucleus.scimplify.com</div>
+        <div class="app-desc"><strong>The Admin Portal.</strong> Scimplify's internal team. Full visibility over all requests, projects, suppliers, and customers. They create projects, manage proposals, assign POCs, and orchestrate everything.</div>
+        <div class="app-tags">
+          <span class="tag" style="background:#e1f5ee;color:#0f6e56;">Admin only</span>
+          <span class="tag" style="background:#e1f5ee;color:#0f6e56;">Full access</span>
+        </div>
+      </div>
+      <div class="app-card">
+        <div class="app-icon" style="background:#eeedfe;color:#534ab7;">S</div>
+        <div class="app-name">SciNode</div>
+        <div class="app-url">devscinode.scimplify.com</div>
+        <div class="app-desc"><strong>The Customer Portal.</strong> Pharma/biotech companies submit requests, review proposals, negotiate, upload POs, and track active projects. View-only after project starts.</div>
+        <div class="app-tags">
+          <span class="tag" style="background:#eeedfe;color:#534ab7;">Customers</span>
+          <span class="tag" style="background:#eeedfe;color:#534ab7;">Submit + Track</span>
+        </div>
+      </div>
+      <div class="app-card">
+        <div class="app-icon" style="background:#e6f1fb;color:#185fa5;">I</div>
+        <div class="app-name">IONS</div>
+        <div class="app-url">devions.scimplify.com</div>
+        <div class="app-desc"><strong>R&D Supplier Portal.</strong> Research labs and CROs receive R&D project details, update milestones, and track progress. Also handles the R&D phase of CDMO projects.</div>
+        <div class="app-tags">
+          <span class="tag" style="background:#e6f1fb;color:#185fa5;">R&D Suppliers</span>
+          <span class="tag" style="background:#e6f1fb;color:#185fa5;">CDMO R&D stage</span>
+        </div>
+      </div>
+      <div class="app-card">
+        <div class="app-icon" style="background:#faeeda;color:#ba7517;">A</div>
+        <div class="app-name">ATOMS</div>
+        <div class="app-url">devatoms.scimplify.com</div>
+        <div class="app-desc"><strong>Manufacturing Supplier Portal.</strong> Contract manufacturers receive CMO/CDMO project details, manage production stages, and update delivery timelines.</div>
+        <div class="app-tags">
+          <span class="tag" style="background:#faeeda;color:#ba7517;">Mfg Suppliers</span>
+          <span class="tag" style="background:#faeeda;color:#ba7517;">CDMO Mfg stage</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout info" style="margin-top:20px">
+      <strong>CDMO spans both:</strong> R&D phase → IONS (with internal ID like ION-8821). Manufacturing phase → ATOMS (ATM-4432). Both are linked to the same master PRJ-YYYY-NNN project ID.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 03: WHO'S INVOLVED ── -->
+  <div class="section" id="who">
+    <div class="section-header">
+      <div class="section-badge" style="background:#faeeda;color:#ba7517;">03</div>
+      <h2>The 3 Stakeholders</h2>
+    </div>
+    <p class="lead">Three types of users interact with the platform. Each has a defined role, a specific app, and controlled access.</p>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="who-head who-row">
+        <div class="who-cell">Stakeholder</div>
+        <div class="who-cell">What they do</div>
+        <div class="who-cell">Their app</div>
+      </div>
+      <div class="who-row">
+        <div class="who-cell role"><span style="font-size:18px">🏢</span>Customer</div>
+        <div class="who-cell" style="font-size:13px">Pharma or biotech company. Submits requests, reviews proposals, negotiates, uploads Purchase Orders (POs). After project starts → <strong>view only</strong>.</div>
+        <div class="who-cell"><span class="tag" style="background:#eeedfe;color:#534ab7;font-size:12px">SciNode</span></div>
+      </div>
+      <div class="who-row">
+        <div class="who-cell role"><span style="font-size:18px">👨‍💼</span>Admin</div>
+        <div class="who-cell" style="font-size:13px">Scimplify's internal team. The orchestrators. They manage the entire lifecycle: review requests → contact suppliers → create proposals → start projects → assign POCs → edit all data.</div>
+        <div class="who-cell"><span class="tag" style="background:#e1f5ee;color:#0f6e56;font-size:12px">Nucleus</span></div>
+      </div>
+      <div class="who-row">
+        <div class="who-cell role"><span style="font-size:18px">🔬🏭</span>Supplier</div>
+        <div class="who-cell" style="font-size:13px">Research labs (CROs) and contract manufacturers. Receive project details from admin, execute work, and update stages and milestones. Cannot see customer-facing pricing. Two sub-types depending on project:<br><br>
+          <strong>R&D / CDMO R&D stage</strong> — CROs and research labs use IONS.<br>
+          <strong>CMO / CDMO manufacturing stage</strong> — Manufacturers use ATOMS.
+        </div>
+        <div class="who-cell" style="display:flex;flex-direction:column;gap:6px;padding-top:16px">
+          <span class="tag" style="background:#e6f1fb;color:#185fa5;font-size:12px">IONS (R&D)</span>
+          <span class="tag" style="background:#faeeda;color:#ba7517;font-size:12px">ATOMS (Mfg)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 04: REQUEST TYPES ── -->
+  <div class="section" id="requests">
+    <div class="section-header">
+      <div class="section-badge" style="background:#faece7;color:#993c1d;">04</div>
+      <h2>The 6 Request Types</h2>
+    </div>
+    <p class="lead">Customers can raise 6 types of requests from SciNode. Each has its own form fields and lifecycle stages.</p>
+
+    <div class="card-grid card-grid-2">
+
+      <!-- RFS -->
+      <div class="req-card">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:22px">📦</span>
+          <div><div class="req-title">RFS</div><div class="req-sub">Request for Sample</div></div>
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-top:6px">Customer wants to receive a physical sample of a product. Simple form — product name, volume, unit (gm/ml/Kg/L), shipping address, pincode, country, attachments.</div>
+        <div class="req-stages">
+          <span class="stage-pill" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56">Sample Requested</span>
+          <span class="stage-pill" style="background:#faeeda;border-color:#ba7517;color:#ba7517">Specs Locked</span>
+          <span class="stage-pill" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56">Sample Dispatched</span>
+        </div>
+      </div>
+
+      <!-- RFQ -->
+      <div class="req-card">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:22px">📋</span>
+          <div><div class="req-title">RFQ</div><div class="req-sub">Request for Quotation</div></div>
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-top:6px">Customer wants a price quote. Can be CRO, CMO, CDMO, or Trading type. Admin reviews and sends back a commercial quote.</div>
+        <div class="req-stages">
+          <span class="stage-pill" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56">Submitted</span>
+          <span class="stage-pill" style="background:#faeeda;border-color:#ba7517;color:#ba7517">Expert Call</span>
+          <span class="stage-pill" style="background:#e6f1fb;border-color:#185fa5;color:#185fa5">Proposal</span>
+          <span class="stage-pill" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56">Closed</span>
+        </div>
+      </div>
+
+      <!-- CMO -->
+      <div class="req-card">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:22px">🏭</span>
+          <div><div class="req-title">CMO</div><div class="req-sub">Contract Manufacturing</div></div>
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-top:6px">Customer needs a compound manufactured at scale. Two sub-types:<br>
+          <strong>Unit Operations Development</strong> — milling, grinding, spray drying, etc.<br>
+          <strong>Tech Transfer & Execution</strong> — customer provides tech pack; Scimplify manufactures.<br>
+          Form captures: chemistry type (up to 10 reactions), equipment needed (up to 5, with KL capacity), quantity, project brief.</div>
+        <div class="req-stages">
+          <span class="stage-pill" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56">Submitted</span>
+          <span class="stage-pill" style="background:#faeeda;border-color:#ba7517;color:#ba7517">Expert Call</span>
+          <span class="stage-pill" style="background:#eeedfe;border-color:#534ab7;color:#534ab7">Process Finalized</span>
+          <span class="stage-pill" style="background:#e6f1fb;border-color:#185fa5;color:#185fa5">Partner Shortlisted</span>
+          <span class="stage-pill" style="background:#faeeda;border-color:#ba7517;color:#ba7517">Commercial Proposal</span>
+          <span class="stage-pill" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56">Closed</span>
+        </div>
+      </div>
+
+      <!-- CDMO -->
+      <div class="req-card">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:22px">⚗️</span>
+          <div><div class="req-title">CDMO</div><div class="req-sub">Custom Dev + Manufacturing</div></div>
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-top:6px">Two sub-types:<br>
+          <strong>Case 1 — Develop and scale a product:</strong> Product name/CAS, target quantity (Kg/L/MT), documents (route of synthesis, specs, SDS).<br>
+          <strong>Case 2 — Improve or optimize a process:</strong> Product name, process details (e.g. "75% purity"), quantity, documents (current process flow, analytical data).</div>
+        <div class="req-stages">
+          <span class="stage-pill" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56">Submitted</span>
+          <span class="stage-pill" style="background:#faeeda;border-color:#ba7517;color:#ba7517">Expert Call</span>
+          <span class="stage-pill" style="background:#eeedfe;border-color:#534ab7;color:#534ab7">Lab & Plant Match</span>
+          <span class="stage-pill" style="background:#faeeda;border-color:#ba7517;color:#ba7517">Proposal Ready</span>
+          <span class="stage-pill" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56">Order Confirmed</span>
+        </div>
+      </div>
+
+      <!-- R&D -->
+      <div class="req-card" style="grid-column:1/-1">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:22px">🔬</span>
+          <div><div class="req-title">R&D Request</div><div class="req-sub">Research & Development — 5 Objective Sub-types</div></div>
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-top:6px;margin-bottom:10px">The most complex request type. The entire form changes based on the objective selected. For CRO or CDMO projects.</div>
+        <div class="card-grid card-grid-2" style="gap:10px">
+          <div style="background:var(--gray-lt);border-radius:var(--radius-sm);padding:12px">
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px">🧪 Exploratory R&D</div>
+            <div style="font-size:12px;color:var(--muted)">Customer describes a problem/hypothesis. May or may not know the product. Form: Problem Statement, Timeline, (optional) Product Name/CAS if known, supporting docs.</div>
+          </div>
+          <div style="background:var(--gray-lt);border-radius:var(--radius-sm);padding:12px">
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px">🧬 Product Development</div>
+            <div style="font-size:12px;color:var(--muted)">Known product. Form requires: Product Name (mandatory), CAS No (mandatory), Requirement Type (one-time/recurring), budget, timeline, docs, comments.</div>
+          </div>
+          <div style="background:var(--gray-lt);border-radius:var(--radius-sm);padding:12px">
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px">⚙️ Process Optimisation & Validation</div>
+            <div style="font-size:12px;color:var(--muted)">Known product. Same fields as Product Development but focused on improving an existing process.</div>
+          </div>
+          <div style="background:var(--gray-lt);border-radius:var(--radius-sm);padding:12px">
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px">🧫 Analytical & Quality Testing</div>
+            <div style="font-size:12px;color:var(--muted)">Known product. Same defined R&D fields. Focused on testing/characterization services.</div>
+          </div>
+          <div style="background:var(--gray-lt);border-radius:var(--radius-sm);padding:12px">
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px">📈 Scale Up</div>
+            <div style="font-size:12px;color:var(--muted)">Known product. Defined R&D fields. Focused on scaling from lab/pilot to commercial quantities.</div>
+          </div>
+          <div style="background:var(--blue-lt);border-radius:var(--radius-sm);padding:12px;border:1px solid #b5d4f4">
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px;color:var(--blue)">R&D Timeline Stages</div>
+            <div class="req-stages" style="margin-top:4px">
+              <span class="stage-pill" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56;font-size:10px">Submitted</span>
+              <span class="stage-pill" style="background:#faeeda;border-color:#ba7517;color:#ba7517;font-size:10px">Expert Call</span>
+              <span class="stage-pill" style="background:#eeedfe;border-color:#534ab7;color:#534ab7;font-size:10px">Process Finalised</span>
+              <span class="stage-pill" style="background:#e6f1fb;border-color:#185fa5;color:#185fa5;font-size:10px">Partner Identified</span>
+              <span class="stage-pill" style="background:#faeeda;border-color:#ba7517;color:#ba7517;font-size:10px">Proposal</span>
+              <span class="stage-pill" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56;font-size:10px">Closed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Consultation -->
+      <div class="req-card">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:22px">💬</span>
+          <div><div class="req-title">Consultation</div><div class="req-sub">Expert Advice</div></div>
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-top:6px">5 consultation types: <strong>Sell My Product</strong>, <strong>Process Optimization</strong>, <strong>Molecule Development</strong>, <strong>Pricing & Markets</strong>, <strong>Other</strong>. A Calendly modal opens immediately — customer picks who to speak with (Sales / R&D / Manufacturing / Supply Chain).</div>
+        <div class="req-stages">
+          <span class="stage-pill" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56">Requested</span>
+          <span class="stage-pill" style="background:#faeeda;border-color:#ba7517;color:#ba7517">Expert Assigned</span>
+          <span class="stage-pill" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56">Completed</span>
+        </div>
+      </div>
+
+      <div class="callout warn" style="align-self:center;margin:0">
+        <strong>Pro tip on proposals:</strong> After a commercial proposal is sent, customer can: <strong>Accept</strong>, <strong>Request Revision</strong> (must specify Price / Scope / Timeline), or <strong>Decline</strong>. Revisions repeat until both agree. PO upload only enabled <em>after</em> the request is Closed.
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 05: STAGE COLOR SYSTEM ── -->
+  <div class="section" id="stages">
+    <div class="section-header">
+      <div class="section-badge" style="background:#e6f1fb;color:#185fa5;">05</div>
+      <h2>Stage Color System</h2>
+    </div>
+    <p class="lead">Throughout the platform, timeline stages use a consistent color language. Learn this once — it applies everywhere.</p>
+
+    <div class="color-demo">
+      <div class="color-chip" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56">
+        <span style="width:10px;height:10px;border-radius:50%;background:#1d9e75;flex-shrink:0"></span>
+        <strong>Green</strong> — Stage is complete
+      </div>
+      <div class="color-chip" style="background:#faeeda;border-color:#ba7517;color:#ba7517">
+        <span style="width:10px;height:10px;border-radius:50%;background:#ba7517;flex-shrink:0"></span>
+        <strong>Yellow / Amber</strong> — Stage is in progress / pending action
+      </div>
+      <div class="color-chip" style="background:var(--gray-lt);border-color:var(--border);color:var(--muted)">
+        <span style="width:10px;height:10px;border-radius:50%;background:var(--border);flex-shrink:0"></span>
+        <strong>Grey</strong> — Stage not yet started
+      </div>
+    </div>
+
+    <div class="callout info">
+      <strong>Example in CMO flow:</strong> When Stage 3 (Process Finalized) is complete (green), Stage 4 (Partner Shortlisted) turns Yellow. When Stage 4 is complete (green), Stage 5 (Commercial Proposal) turns Yellow with the header "Commercial Proposal Getting Ready." Each completed stage automatically activates the next one.
+    </div>
+    <div class="callout purple" style="margin-top:0">
+      <strong>Expert call states:</strong> If the customer scheduled the call from the form → Stage 2 shows <strong>Green</strong>. If they didn't schedule a call yet → Stage 2 shows <strong>Yellow</strong> with a "Consulting Call Pending" Calendly widget to book one.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 06: WHAT IS A PROJECT ── -->
+  <div class="section" id="projects">
+    <div class="section-header">
+      <div class="section-badge" style="background:#e1f5ee;color:#0f6e56;">06</div>
+      <h2>What is a "Project"?</h2>
+    </div>
+    <p class="lead">A project is created after a customer accepts a proposal and places a PO. It is the central record that all three parties (Customer, Admin, Supplier) share under one ID.</p>
+
+    <div class="callout success" style="font-size:15px;font-weight:500">
+      <strong>One Project =</strong> One Customer + One Product + One Business Program (R&D / CMO / CDMO)
+    </div>
+
+    <div class="card-grid card-grid-3" style="margin:20px 0">
+      <div class="card" style="border-top:3px solid #1d9e75">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px">R&D Project</div>
+        <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:15px;margin-bottom:8px">Research</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Supplier: IONS</div>
+        <div class="req-stages">
+          <span class="stage-pill" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56;font-size:10px">Order Placed</span>
+          <span class="stage-pill" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56;font-size:10px">R&D</span>
+          <span class="stage-pill" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56;font-size:10px">Logistics</span>
+          <span class="stage-pill" style="background:#e1f5ee;border-color:#1d9e75;color:#0f6e56;font-size:10px">Track Shipment</span>
+        </div>
+      </div>
+      <div class="card" style="border-top:3px solid #ba7517">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px">CMO Project</div>
+        <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:15px;margin-bottom:8px">Manufacturing</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Supplier: ATOMS</div>
+        <div class="req-stages">
+          <span class="stage-pill" style="background:#faeeda;border-color:#ba7517;color:#ba7517;font-size:10px">Order Placed</span>
+          <span class="stage-pill" style="background:#faeeda;border-color:#ba7517;color:#ba7517;font-size:10px">Manufacturing</span>
+          <span class="stage-pill" style="background:#faeeda;border-color:#ba7517;color:#ba7517;font-size:10px">Logistics</span>
+          <span class="stage-pill" style="background:#faeeda;border-color:#ba7517;color:#ba7517;font-size:10px">Track Shipment</span>
+        </div>
+      </div>
+      <div class="card" style="border-top:3px solid #534ab7">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px">CDMO Project</div>
+        <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:15px;margin-bottom:8px">R&D + Manufacturing</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">IONS + ATOMS</div>
+        <div class="req-stages">
+          <span class="stage-pill" style="background:#eeedfe;border-color:#534ab7;color:#534ab7;font-size:10px">Order Placed</span>
+          <span class="stage-pill" style="background:#eeedfe;border-color:#534ab7;color:#534ab7;font-size:10px">R&D</span>
+          <span class="stage-pill" style="background:#eeedfe;border-color:#534ab7;color:#534ab7;font-size:10px">Manufacturing</span>
+          <span class="stage-pill" style="background:#eeedfe;border-color:#534ab7;color:#534ab7;font-size:10px">Logistics</span>
+          <span class="stage-pill" style="background:#eeedfe;border-color:#534ab7;color:#534ab7;font-size:10px">Track Shipment</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px">📌 The PO Rule — New Project vs. Add PO</div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Scenario</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td>Same customer, same product, new repeat order</td><td style="color:var(--teal);font-weight:600">Add PO to existing project</td></tr>
+          <tr><td>Same customer, same product, supplier changed</td><td style="color:var(--teal);font-weight:600">Add PO to existing project</td></tr>
+          <tr><td>Same customer, same product, ETA revised</td><td style="color:var(--blue);font-weight:600">Edit existing project data</td></tr>
+          <tr><td>Same customer, new molecule/product</td><td style="color:var(--amber);font-weight:600">Create new project</td></tr>
+          <tr><td>New customer, same product</td><td style="color:var(--amber);font-weight:600">Create new project</td></tr>
+          <tr><td>Same customer, same product, new formulation/dosage</td><td style="color:var(--amber);font-weight:600">Usually new project (check with business)</td></tr>
+          <tr><td>Admin places PO with no customer yet confirmed</td><td style="color:var(--blue);font-weight:600">Create project with "Customer: TBD" — backfill later</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout info" style="margin-top:16px">
+      <strong>3 ways to create a project:</strong> Admin can click "Start Project" from (1) the Supplier Proposal page, (2) the Customer Request page, or (3) the Projects Dashboard directly. All three open the same unified popup. Fields pre-filled from linked proposals/requests are shown with a "Fetched" indicator but remain editable.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 07: PROJECT STRUCTURE ── -->
+  <div class="section" id="project-structure">
+    <div class="section-header">
+      <div class="section-badge" style="background:#eeedfe;color:#534ab7;">07</div>
+      <h2>Project Detail Page Structure</h2>
+    </div>
+    <p class="lead">Every project detail page (in all portals) is organized into 4 headers. The content in Header 3 changes based on project type. There is also a special Execution Fit section visible only to customers.</p>
+
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px">
+      <div style="background:var(--gray-lt);padding:10px 20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--muted)">4 Standard Headers (All Project Types)</div>
+      <div style="padding:8px 20px">
+        <div class="header-row">
+          <div class="header-num" style="background:#e1f5ee;color:#0f6e56">H1</div>
+          <div class="header-content">
+            <div class="h-title">Project Details <span style="font-size:11px;color:var(--muted);font-weight:400">(common to all types)</span></div>
+            <div class="h-desc">Product Name, CAS Number, Total POs expected, Quantity + Unit (multiple pills supported), Internal POC name/email, Customer POC name/email, Created Date.</div>
+          </div>
+        </div>
+        <div class="header-row">
+          <div class="header-num" style="background:#faeeda;color:#ba7517">H2</div>
+          <div class="header-content">
+            <div class="h-title">PO Details — Supplier View <span style="font-size:11px;color:var(--red);font-weight:400">⚠ Never shown to customer</span></div>
+            <div class="h-desc">Release Date, ETA, Timeline, Quantity, Price Per Unit (currency + number + unit), Order Value, Specs, Packaging Type, Payment Terms. Contains sensitive pricing — customer never sees this.</div>
+          </div>
+        </div>
+        <div class="header-row">
+          <div class="header-num" style="background:#eeedfe;color:#534ab7">H3</div>
+          <div class="header-content">
+            <div class="h-title">Scope / Requirements <span style="font-size:11px;color:var(--muted);font-weight:400">(varies by project type)</span></div>
+            <div class="h-desc">
+              <strong>R&D & CDMO:</strong> Product Image, Proposal Code, Submitted Date, RFQ Date, Quantity ETA (per-pill), Delivery Date, Appearance, Grade, Application, ROS file.<br>
+              <strong>CMO only:</strong> Yield, Impurity, Assay (with dynamic "by [Tool Name]" sub-label once tool selected from dropdown).
+            </div>
+          </div>
+        </div>
+        <div class="header-row">
+          <div class="header-num" style="background:#e6f1fb;color:#185fa5">H4</div>
+          <div class="header-content">
+            <div class="h-title">Terms <span style="font-size:11px;color:var(--muted);font-weight:400">(common to all types)</span></div>
+            <div class="h-desc">Payment Terms section: Payment Method, Payment Terms (synced with H2), Note. General Terms section: free-form contractual notes. Edits in H4 sync back to H2 automatically.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px">⭐ Execution Fit Section — Customer View Only</div>
+    <p class="lead">This section is shown <strong>only to customers</strong> on SciNode. Admin fills it in Nucleus to give the customer confidence in the chosen lab/plant. It is <strong>never shown to suppliers</strong>.</p>
+    <div class="card-grid card-grid-3">
+      <div class="card">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px">R&D Project</div>
+        <div style="font-size:13px;color:var(--muted)">Shows <strong>Lab Details</strong>: Lab Name/Location, Lab Image, Fit Score (shown as %), Capability Highlights (bullet list, each up to 200 chars).</div>
+      </div>
+      <div class="card">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px">CMO Project</div>
+        <div style="font-size:13px;color:var(--muted)">Shows <strong>Plant Details</strong>: Plant Name/Location, Plant Image, Fit Score (%), "Why This Manufacturer?" highlights list.</div>
+      </div>
+      <div class="card">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px">CDMO Project</div>
+        <div style="font-size:13px;color:var(--muted)">Shows <strong>all three</strong>: Lab Details + Pilot Plant Details + Plant Details. Each has its own image, fit score %, and highlights.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 08: WHO SEES WHAT ── -->
+  <div class="section" id="views">
+    <div class="section-header">
+      <div class="section-badge" style="background:#eaf3de;color:#3b6d11;">08</div>
+      <h2>Who Sees What — Privacy Rules</h2>
+    </div>
+    <p class="lead">The platform carefully controls what each stakeholder can see and edit. This protects pricing from customers and execution details from irrelevant parties.</p>
+
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Section</th><th>Admin</th><th>Supplier</th><th>Customer</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>H1 — Project Details</strong></td>
+            <td class="perm-check">✓ Full edit</td>
+            <td class="perm-partial">Edit (own fields)</td>
+            <td class="perm-partial">View only</td>
+          </tr>
+          <tr>
+            <td><strong>H2 — Supplier PO Details</strong> (pricing, ETA, order value)</td>
+            <td class="perm-check">✓ Full edit</td>
+            <td class="perm-check">✓ Edit</td>
+            <td class="perm-cross">✗ Hidden entirely</td>
+          </tr>
+          <tr>
+            <td><strong>Customer PO Details</strong> (PO number, release date, ETA)</td>
+            <td class="perm-check">✓ Full edit</td>
+            <td class="perm-partial">View only</td>
+            <td class="perm-partial">View only (own PO)</td>
+          </tr>
+          <tr>
+            <td><strong>H3 — Scope / Requirements</strong></td>
+            <td class="perm-check">✓ Full edit</td>
+            <td class="perm-check">✓ Edit</td>
+            <td class="perm-partial">View only</td>
+          </tr>
+          <tr>
+            <td><strong>H4 — Terms</strong></td>
+            <td class="perm-check">✓ Full edit</td>
+            <td class="perm-check">✓ Edit</td>
+            <td class="perm-partial">View only</td>
+          </tr>
+          <tr>
+            <td><strong>Execution Fit</strong> (lab/plant image, fit score, highlights)</td>
+            <td class="perm-check">✓ Full edit</td>
+            <td class="perm-cross">✗ Not shown</td>
+            <td class="perm-check">✓ View only</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warn" style="margin-top:16px">
+      <strong>Key privacy rules:</strong> Customer never sees supplier pricing (Price Per Unit, Order Value). Supplier never sees the Execution Fit section. Customer PO ETA and Timeline are synced from the Supplier's ETA — if admin changes supplier ETA, it auto-updates customer's view too.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 09: FULL LIFECYCLE ── -->
+  <div class="section" id="lifecycle">
+    <div class="section-header">
+      <div class="section-badge" style="background:#faeeda;color:#ba7517;">09</div>
+      <h2>End-to-End Project Lifecycle</h2>
+    </div>
+    <p class="lead">Every project follows this journey — from a customer filling a form to active delivery being tracked by all parties.</p>
+
+    <div class="timeline" style="margin-top:24px">
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot" style="background:#eeedfe;color:#534ab7">1</div><div class="tl-line"></div></div>
+        <div class="tl-content">
+          <div class="tl-title">Customer submits a request on SciNode</div>
+          <div class="tl-desc">Picks a request type (RFS, RFQ, CMO, CDMO, R&D, Consultation), fills the form, optionally schedules a call via Calendly. Both "scheduled call" and "no call" flows work — the system handles both states with different stage colors.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot" style="background:#faeeda;color:#ba7517">2</div><div class="tl-line"></div></div>
+        <div class="tl-content">
+          <div class="tl-title">Admin reviews → Expert assigned → Call scheduled</div>
+          <div class="tl-desc">Admin (in Nucleus) reviews request. Assigns an expert (Production Engineer). Expert call happens via Calendly. This is the "Talk to Our Expert" stage.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot" style="background:#e6f1fb;color:#185fa5">3</div><div class="tl-line"></div></div>
+        <div class="tl-content">
+          <div class="tl-title">Process Finalized (admin fills details after call)</div>
+          <div class="tl-desc">For CMO: admin fills 4 tabs — Project Brief, Key Challenges, Required Equipment, Project Scale. For CDMO/R&D: Lab & Plant matched — best-fit CRO selected with Partner Name, Type, Location, Compliance (GLP/Non-GMP), Selection Rationale, Capabilities, Equipment.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot" style="background:#e1f5ee;color:#0f6e56">4</div><div class="tl-line"></div></div>
+        <div class="tl-content">
+          <div class="tl-title">Partner shortlisted / Research partner identified</div>
+          <div class="tl-desc">Admin selects best-fit supplier. Match Score is calculated and shown to customer (see Section 10). Competitive Advantages (Track Record, Regulatory Compliance, Cost Efficiency, Timeline Assurance) are added by admin.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot" style="background:#faeeda;color:#ba7517">5</div><div class="tl-line"></div></div>
+        <div class="tl-content">
+          <div class="tl-title">Commercial Proposal sent to customer</div>
+          <div class="tl-desc">Admin publishes proposal. Customer sees: Project Title, Research Partner, Lead Time, Currency, Price per Quantity table, Scope of Work (Study Type, Method, Sample Quantities), Specs (Quality Attributes, ROS, Supporting Docs), Payment Terms, Shipment Terms.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot" style="background:#e1f5ee;color:#0f6e56">6</div><div class="tl-line"></div></div>
+        <div class="tl-content">
+          <div class="tl-title">Customer accepts, revises, or declines</div>
+          <div class="tl-desc">Customer can: <strong>Accept Proposal</strong> (final — pricing locked), <strong>Request Revision</strong> (must pick: Price / Scope / Timeline + free text comment — request goes to "Revision Requested" status), or <strong>Decline</strong> (mandatory reason required). Revised offers show a "New Quote Available" badge.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot" style="background:#534ab7;color:#fff">7</div><div class="tl-line"></div></div>
+        <div class="tl-content">
+          <div class="tl-title">Customer uploads PO → Request Closed</div>
+          <div class="tl-desc">After accepting, customer enters PO Number and uploads PO document. PO Release Date is auto-captured (not manually set). Request status → "Closed". PO upload is only enabled after closure.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot" style="background:#0f6e56;color:#fff">8</div><div class="tl-line"></div></div>
+        <div class="tl-content">
+          <div class="tl-title">Admin creates the Project</div>
+          <div class="tl-desc">Admin clicks "Start Project" (from Supplier Proposal page, Customer Request page, or Projects Dashboard). Selects type → fills headers → submits. System creates Master Project ID (e.g. PRJ-2026-001), sends emails to both supplier and customer, marks request and proposal as "Project Created".</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot" style="background:#1d9e75;color:#fff">9</div><div class="tl-line" style="opacity:0"></div></div>
+        <div class="tl-content">
+          <div class="tl-title">Active execution — all parties track the same record</div>
+          <div class="tl-desc">Supplier (IONS/ATOMS) updates milestones and stages. Admin orchestrates in Nucleus. Customer tracks progress in SciNode (view-only). New POs can be added at any time without creating a new project row.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 10: MATCH SCORES ── -->
+  <div class="section" id="scoring">
+    <div class="section-header">
+      <div class="section-badge" style="background:#faeeda;color:#ba7517;">10</div>
+      <h2>Match Score Systems</h2>
+    </div>
+    <p class="lead">There are <strong>two different match score formulas</strong> — one for selecting a CRO (for R&D/CDMO) and a different one for selecting a CMO (for manufacturing). Both are calculated by admin and shown to the customer as a percentage.</p>
+
+    <div class="card-grid card-grid-2">
+      <!-- CRO Score -->
+      <div class="card">
+        <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px">🔬 CRO Match Score</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:16px">For R&D and CDMO projects</div>
+        <div class="score-row">
+          <div class="score-label">🧪 Chemistry / Product Match</div>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:45%;background:#1d9e75"></div></div>
+          <div class="score-pct" style="color:#0f6e56">45%</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);padding:4px 0 10px;border-bottom:1px solid var(--border)">
+          Exact/Similar Product History (25) + Chemical Class Experience (10) + Scale & Complexity Fit (10) = 45 pts<br>
+          <em>Formula: (History + Class + Scale) / 45 × 45%</em>
+        </div>
+        <div class="score-row">
+          <div class="score-label">⚙️ Equipment Match</div>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:20%;background:#ba7517"></div></div>
+          <div class="score-pct" style="color:#ba7517">20%</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);padding:4px 0 10px;border-bottom:1px solid var(--border)">All equipment available=20 · Most available=12 · Major gaps=6 · None=0</div>
+        <div class="score-row">
+          <div class="score-label">📍 Location Match</div>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:20%;background:#534ab7"></div></div>
+          <div class="score-pct" style="color:#534ab7">20%</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);padding:4px 0 10px">Preferred=20 · Acceptable=12 · Non-preferred=6 · Not acceptable=0</div>
+        <div style="background:var(--teal-lt);border-radius:var(--radius-sm);padding:10px 14px;font-family:'Sora',sans-serif;font-size:13px;font-weight:700;color:var(--teal);margin-top:8px">
+          Total = Chemistry (45%) + Equipment (20%) + Location (20%) = max 85%
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">Note: match score is NOT shown for Exploratory R&D requests — only for defined objectives (Product Dev, Scale Up, etc.)</div>
+      </div>
+
+      <!-- CMO Score -->
+      <div class="card">
+        <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px">🏭 CMO Match Score</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:16px">For CMO (manufacturing) projects</div>
+        <div class="score-row">
+          <div class="score-label">⚙️ Equipment Match</div>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:45%;background:#ba7517"></div></div>
+          <div class="score-pct" style="color:#ba7517">45%</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);padding:4px 0 10px;border-bottom:1px solid var(--border)">
+          Formula: (Equipment available ÷ Equipment required) × 45
+        </div>
+        <div class="score-row">
+          <div class="score-label">🧪 Reaction Match</div>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:35%;background:#185fa5"></div></div>
+          <div class="score-pct" style="color:#185fa5">35%</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);padding:4px 0 10px;border-bottom:1px solid var(--border)">
+          Formula: (Reactions available ÷ Reactions required) × 35<br>
+          Only applies to <em>Tech Transfer</em> sub-type (not Unit Operations)
+        </div>
+        <div class="score-row">
+          <div class="score-label">📍 Location Match</div>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:20%;background:#534ab7"></div></div>
+          <div class="score-pct" style="color:#534ab7">20%</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);padding:4px 0 10px">Preferred=20 · Acceptable=12 · Non-preferred=6 · Not acceptable=0</div>
+        <div style="background:var(--amber-lt);border-radius:var(--radius-sm);padding:10px 14px;font-family:'Sora',sans-serif;font-size:13px;font-weight:700;color:var(--amber);margin-top:8px">
+          Total = Equipment (45%) + Reaction (35%) + Location (20%) = max 100%
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">Admin adds all scoring details. Customer only ever sees the final percentage — not the breakdown.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 11: ROLES ── -->
+  <div class="section" id="roles">
+    <div class="section-header">
+      <div class="section-badge" style="background:var(--gray-lt);color:var(--gray);">11</div>
+      <h2>Roles & Permissions</h2>
+    </div>
+    <p class="lead">Access is tightly controlled. Here are all roles across all apps and what each can do.</p>
+
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Role</th><th>App</th><th>Can Create / Edit</th><th>Sees all projects?</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Super Admin</strong></td>
+            <td><span class="tag" style="background:#e1f5ee;color:#0f6e56;font-size:11px">Nucleus</span></td>
+            <td class="perm-check">✓ Everything on the platform</td>
+            <td class="perm-check">✓ Yes — all projects</td>
+          </tr>
+          <tr>
+            <td><strong>Primary POC</strong></td>
+            <td><span class="tag" style="background:#e1f5ee;color:#0f6e56;font-size:11px">Nucleus</span></td>
+            <td class="perm-check">✓ Adds & manages project details</td>
+            <td class="perm-cross">✗ Assigned projects only</td>
+          </tr>
+          <tr>
+            <td><strong>Secondary POC</strong></td>
+            <td><span class="tag" style="background:#e1f5ee;color:#0f6e56;font-size:11px">Nucleus</span></td>
+            <td class="perm-partial">Reviews & validates only</td>
+            <td class="perm-cross">✗ Assigned projects only</td>
+          </tr>
+          <tr>
+            <td><strong>IONS CRUD Role</strong></td>
+            <td><span class="tag" style="background:#e6f1fb;color:#185fa5;font-size:11px">IONS</span></td>
+            <td class="perm-check">✓ Create / Edit / Delete R&D data + POs</td>
+            <td class="perm-cross">✗ R&D + CDMO R&D-stage only</td>
+          </tr>
+          <tr>
+            <td><strong>IONS Viewer Role</strong></td>
+            <td><span class="tag" style="background:#e6f1fb;color:#185fa5;font-size:11px">IONS</span></td>
+            <td class="perm-cross">✗ View only</td>
+            <td class="perm-cross">✗ R&D + CDMO R&D-stage only</td>
+          </tr>
+          <tr>
+            <td><strong>ATOMS CRUD Role</strong></td>
+            <td><span class="tag" style="background:#faeeda;color:#ba7517;font-size:11px">ATOMS</span></td>
+            <td class="perm-check">✓ Create / Edit / Delete Mfg data + POs</td>
+            <td class="perm-cross">✗ CMO + CDMO Mfg-stage only</td>
+          </tr>
+          <tr>
+            <td><strong>ATOMS Viewer Role</strong></td>
+            <td><span class="tag" style="background:#faeeda;color:#ba7517;font-size:11px">ATOMS</span></td>
+            <td class="perm-cross">✗ View only</td>
+            <td class="perm-cross">✗ CMO + CDMO Mfg-stage only</td>
+          </tr>
+          <tr>
+            <td><strong>Customer</strong></td>
+            <td><span class="tag" style="background:#eeedfe;color:#534ab7;font-size:11px">SciNode</span></td>
+            <td class="perm-partial">Submit requests + accept/decline proposals</td>
+            <td class="perm-cross">✗ Own projects only</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-grid card-grid-2" style="margin-top:16px">
+      <div class="callout purple" style="margin:0">
+        <strong>CDMO POC split:</strong> Primary POC handles R&D-stage POs. Secondary POC handles Manufacturing-stage POs. Both access the same CDMO project record, but editing is controlled by PO stage.
+      </div>
+      <div class="callout info" style="margin:0">
+        <strong>CDMO access across apps:</strong> IONS roles see R&D + Pilot POs. ATOMS roles see Manufacturing POs. The same CDMO project can have R&D PO, Pilot PO, and Manufacturing PO — each team only sees their stage.
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- QUICK REFERENCE -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-badge" style="background:#e1f5ee;color:#0f6e56;">✓</div>
+      <h2>Quick Reference Cheat Sheet</h2>
+    </div>
+    <div class="card-grid card-grid-2">
+      <div class="card" style="background:var(--gray-lt);border:none">
+        <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:14px;margin-bottom:12px">🗂 Key Terms</div>
+        <table style="width:100%;font-size:13px;border-collapse:collapse">
+          <tr><td style="padding:5px 0;color:var(--muted);width:70px">RFS</td><td style="padding:5px 0;font-weight:500">Request for Sample</td></tr>
+          <tr><td style="padding:5px 0;color:var(--muted)">RFQ</td><td style="padding:5px 0;font-weight:500">Request for Quotation</td></tr>
+          <tr><td style="padding:5px 0;color:var(--muted)">CMO</td><td style="padding:5px 0;font-weight:500">Contract Manufacturing Org</td></tr>
+          <tr><td style="padding:5px 0;color:var(--muted)">CRO</td><td style="padding:5px 0;font-weight:500">Contract Research Org</td></tr>
+          <tr><td style="padding:5px 0;color:var(--muted)">CDMO</td><td style="padding:5px 0;font-weight:500">Contract Dev & Mfg Org</td></tr>
+          <tr><td style="padding:5px 0;color:var(--muted)">PO</td><td style="padding:5px 0;font-weight:500">Purchase Order</td></tr>
+          <tr><td style="padding:5px 0;color:var(--muted)">POC</td><td style="padding:5px 0;font-weight:500">Point of Contact</td></tr>
+          <tr><td style="padding:5px 0;color:var(--muted)">CAS No</td><td style="padding:5px 0;font-weight:500">Chemical identity number</td></tr>
+          <tr><td style="padding:5px 0;color:var(--muted)">ROS</td><td style="padding:5px 0;font-weight:500">Report of Synthesis</td></tr>
+          <tr><td style="padding:5px 0;color:var(--muted)">GLP</td><td style="padding:5px 0;font-weight:500">Good Laboratory Practice</td></tr>
+        </table>
+      </div>
+      <div class="card" style="background:var(--gray-lt);border:none">
+        <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:14px;margin-bottom:12px">🔗 App → Who uses it → What for</div>
+        <table style="width:100%;font-size:13px;border-collapse:collapse">
+          <tr><td style="padding:5px 0;font-weight:600;color:#0f6e56;width:72px">Nucleus</td><td style="padding:5px 0">Admin → full orchestration</td></tr>
+          <tr><td style="padding:5px 0;font-weight:600;color:#534ab7">SciNode</td><td style="padding:5px 0">Customers → request + track</td></tr>
+          <tr><td style="padding:5px 0;font-weight:600;color:#185fa5">IONS</td><td style="padding:5px 0">R&D suppliers → execute R&D</td></tr>
+          <tr><td style="padding:5px 0;font-weight:600;color:#ba7517">ATOMS</td><td style="padding:5px 0">Mfg suppliers → execute manufacturing</td></tr>
+        </table>
+        <div style="margin-top:16px;font-family:'Sora',sans-serif;font-weight:700;font-size:13px;margin-bottom:6px">📌 ID formats</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <code style="background:var(--white);padding:6px 10px;border-radius:6px;font-size:12px;border:1px solid var(--border)">PRJ-2026-001 — Master project ID (shared)</code>
+          <code style="background:var(--white);padding:6px 10px;border-radius:6px;font-size:12px;border:1px solid var(--border)">ION-8821 — IONS internal ID</code>
+          <code style="background:var(--white);padding:6px 10px;border-radius:6px;font-size:12px;border:1px solid var(--border)">ATM-4432 — ATOMS internal ID</code>
+          <code style="background:var(--white);padding:6px 10px;border-radius:6px;font-size:12px;border:1px solid var(--border)">PO-001, PO-002... — incremental per project</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+.abbr-tip {
+  cursor: help;
+  position: relative;
+  display: inline;
+}
+.abbr-tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gray-dk);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 9999;
+}
+.abbr-tip:hover::after { opacity: 1; }
+</style>
+
+<script>
+const abbrs = {
+  'CDMO':  'Contract Development and Manufacturing Organisation',
+  'CRAMS': 'Contract Research and Manufacturing Services',
+  'CMO':   'Contract Manufacturing Organisation',
+  'CRO':   'Contract Research Organisation',
+  'RFQ':   'Request for Quotation',
+  'RFS':   'Request for Sample',
+  'POC':   'Point of Contact',
+  'GLP':   'Good Laboratory Practice',
+  'GMP':   'Good Manufacturing Practice',
+  'ETA':   'Estimated Time of Arrival',
+  'CAS':   'Chemical Abstracts Service number',
+  'ROS':   'Route of Synthesis',
+  'SDS':   'Safety Data Sheet',
+  'API':   'Active Pharmaceutical Ingredient',
+  'R&D':   'Research and Development',
+  'PO':    'Purchase Order',
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  const keys = Object.keys(abbrs).sort((a, b) => b.length - a.length);
+  const escapedKeys = keys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  // Group 1 = abbreviation, Group 2 = optional trailing 's' (for plurals like POs, POCs)
+  const regex = new RegExp('\\b(' + escapedKeys.join('|') + ')(s)?\\b', 'g');
+
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode(node) {
+        const p = node.parentElement;
+        if (!p) return NodeFilter.FILTER_REJECT;
+        if (['SCRIPT','STYLE','CODE','PRE'].includes(p.tagName)) return NodeFilter.FILTER_REJECT;
+        if (p.classList.contains('abbr-tip')) return NodeFilter.FILTER_REJECT;
+        if (!regex.test(node.textContent)) { regex.lastIndex = 0; return NodeFilter.FILTER_REJECT; }
+        regex.lastIndex = 0;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    }
+  );
+
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+
+  nodes.forEach(node => {
+    const frag = document.createDocumentFragment();
+    let last = 0, m;
+    regex.lastIndex = 0;
+    while ((m = regex.exec(node.textContent)) !== null) {
+      if (m.index > last) frag.appendChild(document.createTextNode(node.textContent.slice(last, m.index)));
+      // Wrap only the abbreviation (m[1]) with the tooltip
+      const span = document.createElement('span');
+      span.className = 'abbr-tip';
+      span.setAttribute('data-tip', abbrs[m[1]]);
+      span.textContent = m[1];
+      frag.appendChild(span);
+      // Append the trailing 's' (m[2]) as plain unstyled text if present
+      if (m[2]) frag.appendChild(document.createTextNode(m[2]));
+      last = m.index + m[0].length;
+    }
+    if (last < node.textContent.length) frag.appendChild(document.createTextNode(node.textContent.slice(last)));
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+</script>
+
+<div class="footer">
+  <strong>Scimplify New Joiner Guide — Complete Edition</strong><br>
+  Built from internal product documentation (Requests Module + Active Project Management) · For internal use only
+</div>
+
+</body>
+</html>
