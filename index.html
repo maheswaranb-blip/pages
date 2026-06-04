@@ -12,107 +12,445 @@
       min-height: 100vh;
       padding: 40px 20px;
     }
-    .container {
-      max-width: 640px;
-      margin: 0 auto;
-    }
-    h1 {
-      font-size: 1.6rem;
-      font-weight: 600;
-      color: #111;
+    .container { max-width: 640px; margin: 0 auto; }
+    .header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
       margin-bottom: 8px;
     }
-    .subtitle {
-      font-size: 0.9rem;
+    h1 { font-size: 1.6rem; font-weight: 600; color: #111; }
+    .subtitle { font-size: 0.9rem; color: #888; margin-bottom: 28px; }
+
+    #edit-btn {
+      font-size: 0.82rem;
       color: #888;
-      margin-bottom: 32px;
+      background: none;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: all 0.15s;
     }
-    #list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    #edit-btn:hover { border-color: #999; color: #333; }
+    #edit-btn.active { border-color: #333; color: #333; background: #fff; }
+
+    #save-bar {
+      display: none;
+      gap: 8px;
+      margin-bottom: 16px;
     }
-    .page-link {
-      display: block;
+    #save-bar.visible { display: flex; }
+    #save-btn {
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 20px;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    #save-btn:hover { background: #333; }
+    #cancel-btn {
+      background: none;
+      color: #666;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    #save-status { font-size: 0.82rem; color: #888; align-self: center; }
+
+    #list { display: flex; flex-direction: column; gap: 10px; }
+
+    .card {
       background: #fff;
       border: 1px solid #e0e0e0;
       border-radius: 8px;
       padding: 16px 20px;
-      text-decoration: none;
-      color: #111;
-      font-size: 0.95rem;
       transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .page-link:hover {
+    .card a {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+    }
+    .card:not(.editing):hover {
       border-color: #666;
       box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     }
-    .page-link .name {
-      font-weight: 500;
+    .card .name { font-weight: 500; font-size: 0.95rem; color: #111; }
+    .card .desc { font-size: 0.85rem; color: #888; margin-top: 3px; }
+    .card .path { font-size: 0.75rem; color: #bbb; margin-top: 4px; }
+
+    /* edit mode card */
+    .card.editing { border-color: #bbb; cursor: default; }
+    .edit-row { display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+    .edit-row + .edit-row { margin-top: 8px; }
+    .edit-field {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex: 1;
     }
-    .page-link .path {
-      font-size: 0.78rem;
-      color: #aaa;
-      margin-top: 3px;
+    .edit-field.narrow { flex: 0 0 70px; }
+    .edit-field label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.04em; }
+    .edit-field input {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 6px 8px;
+      font-size: 0.875rem;
+      color: #111;
+      font-family: inherit;
+      width: 100%;
     }
-    .empty {
-      color: #aaa;
-      font-size: 0.9rem;
-      padding: 20px 0;
-    }
+    .edit-field input:focus { outline: none; border-color: #888; }
+    .card-path-edit { font-size: 0.75rem; color: #bbb; margin-top: 8px; }
+
+    .empty { color: #aaa; font-size: 0.9rem; padding: 20px 0; }
     .error {
-      color: #c0392b;
-      font-size: 0.85rem;
-      background: #fdf0ee;
-      border: 1px solid #f5c6c0;
-      border-radius: 6px;
-      padding: 12px 16px;
+      color: #c0392b; font-size: 0.85rem;
+      background: #fdf0ee; border: 1px solid #f5c6c0;
+      border-radius: 6px; padding: 12px 16px;
     }
+
+    /* token modal */
+    #modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    #modal-overlay.visible { display: flex; }
+    #modal {
+      background: #fff;
+      border-radius: 10px;
+      padding: 28px 28px 24px;
+      width: 420px;
+      max-width: 90vw;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+    #modal h2 { font-size: 1rem; margin-bottom: 8px; }
+    #modal p { font-size: 0.82rem; color: #888; margin-bottom: 16px; line-height: 1.5; }
+    #modal input {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 9px 12px;
+      font-size: 0.875rem;
+      font-family: monospace;
+      margin-bottom: 12px;
+    }
+    #modal input:focus { outline: none; border-color: #888; }
+    .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+    #modal-save {
+      background: #111; color: #fff;
+      border: none; border-radius: 6px;
+      padding: 8px 18px; font-size: 0.875rem; cursor: pointer;
+    }
+    #modal-cancel {
+      background: none; color: #666;
+      border: 1px solid #ddd; border-radius: 6px;
+      padding: 8px 14px; font-size: 0.875rem; cursor: pointer;
+    }
+    #modal-err { font-size: 0.8rem; color: #c0392b; margin-bottom: 8px; display: none; }
   </style>
 </head>
 <body>
-  <div class="container">
+<div class="container">
+  <div class="header">
     <h1>Pages</h1>
-    <p class="subtitle">All available pages</p>
-    <div id="list">Loading...</div>
+    <button id="edit-btn">Edit</button>
+  </div>
+  <p class="subtitle">All available pages</p>
+
+  <div id="save-bar">
+    <button id="save-btn">Save changes</button>
+    <button id="cancel-btn">Cancel</button>
+    <span id="save-status"></span>
   </div>
 
-  <script>
-    const OWNER = 'maheswaranb-blip';
-    const REPO = 'pages';
-    const FOLDER = 'docs';
-    const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FOLDER}`;
-    const BASE = `https://${OWNER}.github.io/${REPO}/${FOLDER}/`;
+  <div id="list">Loading...</div>
+</div>
 
-    async function load() {
-      const el = document.getElementById('list');
-      try {
-        const res = await fetch(API);
-        if (res.status === 404) {
-          el.innerHTML = '<p class="empty">No pages yet. Add .html files to the /docs folder.</p>';
-          return;
-        }
-        if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
-        const files = await res.json();
-        const pages = files.filter(f => f.name.endsWith('.html'));
-        if (pages.length === 0) {
-          el.innerHTML = '<p class="empty">No pages yet. Add .html files to the /docs folder.</p>';
-          return;
-        }
-        el.innerHTML = pages.map(f => {
-          const label = f.name.replace('.html', '').replace(/[-_]/g, ' ');
-          const capitalized = label.charAt(0).toUpperCase() + label.slice(1);
-          return `<a class="page-link" href="${BASE}${f.name}">
-            <div class="name">${capitalized}</div>
-            <div class="path">/docs/${f.name}</div>
-          </a>`;
-        }).join('');
-      } catch (e) {
-        el.innerHTML = `<p class="error">Could not load pages: ${e.message}</p>`;
-      }
+<!-- token modal -->
+<div id="modal-overlay">
+  <div id="modal">
+    <h2>GitHub Token</h2>
+    <p>Enter a Personal Access Token with <strong>repo</strong> scope for <strong>maheswaranb-blip</strong>. It will be stored only in your browser.</p>
+    <input id="token-input" type="password" placeholder="ghp_...">
+    <div id="modal-err">Invalid token or insufficient permissions.</div>
+    <div class="modal-btns">
+      <button id="modal-cancel">Cancel</button>
+      <button id="modal-save">Save &amp; continue</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const OWNER = 'maheswaranb-blip';
+const REPO  = 'pages';
+const FOLDER = 'docs';
+const MANIFEST = 'docs/_manifest.json';
+const API_CONTENTS = `https://api.github.com/repos/${OWNER}/${REPO}/contents/`;
+const BASE_URL = `https://${OWNER}.github.io/${REPO}/${FOLDER}/`;
+
+let allFiles = [];
+let manifest = [];
+let manifestSha = null;
+let editMode = false;
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+
+function getToken() { return localStorage.getItem('gh_token_pages'); }
+function setToken(t) { localStorage.setItem('gh_token_pages', t); }
+
+function authHeaders(token) {
+  const h = { 'Accept': 'application/vnd.github+json' };
+  if (token) h['Authorization'] = `token ${token}`;
+  return h;
+}
+
+function getEntry(filename) {
+  return manifest.find(m => m.file === filename) || {};
+}
+
+function displayName(filename) {
+  const e = getEntry(filename);
+  if (e.name) return e.name;
+  return filename.replace('.html','').replace(/[-_]/g,' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function displayDesc(filename) { return getEntry(filename).desc || ''; }
+function displayOrder(filename) {
+  const e = getEntry(filename);
+  return e.order !== undefined ? e.order : 999;
+}
+
+function sortedFiles() {
+  return [...allFiles].sort((a, b) => displayOrder(a) - displayOrder(b));
+}
+
+// ── render ────────────────────────────────────────────────────────────────────
+
+function render() {
+  const el = document.getElementById('list');
+  if (!allFiles.length) {
+    el.innerHTML = '<p class="empty">No pages yet. Add .html files to the /docs folder.</p>';
+    return;
+  }
+  const files = sortedFiles();
+  if (editMode) {
+    el.innerHTML = files.map((f, i) => {
+      const e = getEntry(f);
+      const name = e.name || '';
+      const desc = e.desc || '';
+      const order = e.order !== undefined ? e.order : i + 1;
+      return `<div class="card editing" data-file="${f}">
+        <div class="edit-row">
+          <div class="edit-field">
+            <label>Name</label>
+            <input class="f-name" type="text" value="${esc(name)}" placeholder="${esc(displayName(f))}">
+          </div>
+          <div class="edit-field narrow">
+            <label>Order</label>
+            <input class="f-order" type="number" value="${order}" min="1">
+          </div>
+        </div>
+        <div class="edit-row">
+          <div class="edit-field">
+            <label>Description</label>
+            <input class="f-desc" type="text" value="${esc(desc)}" placeholder="Short description…">
+          </div>
+        </div>
+        <div class="card-path-edit">/docs/${f}</div>
+      </div>`;
+    }).join('');
+  } else {
+    el.innerHTML = files.map(f => {
+      const name = displayName(f);
+      const desc = displayDesc(f);
+      return `<div class="card">
+        <a href="${BASE_URL}${f}">
+          <div class="name">${esc(name)}</div>
+          ${desc ? `<div class="desc">${esc(desc)}</div>` : ''}
+          <div class="path">/docs/${f}</div>
+        </a>
+      </div>`;
+    }).join('');
+  }
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── load ──────────────────────────────────────────────────────────────────────
+
+async function load() {
+  const el = document.getElementById('list');
+  try {
+    const [filesRes, manifestRes] = await Promise.all([
+      fetch(API_CONTENTS + FOLDER, { headers: authHeaders(getToken()) }),
+      fetch(API_CONTENTS + MANIFEST, { headers: authHeaders(getToken()) })
+    ]);
+
+    if (filesRes.status === 404) {
+      el.innerHTML = '<p class="empty">No pages yet. Add .html files to the /docs folder.</p>';
+      return;
+    }
+    if (!filesRes.ok) throw new Error(`GitHub API error: ${filesRes.status}`);
+
+    const files = await filesRes.json();
+    allFiles = files.filter(f => f.name.endsWith('.html') && f.name !== '_manifest.json').map(f => f.name);
+
+    if (manifestRes.ok) {
+      const mdata = await manifestRes.json();
+      manifestSha = mdata.sha;
+      manifest = JSON.parse(atob(mdata.content.replace(/\n/g, '')));
+    } else {
+      manifest = [];
+      manifestSha = null;
     }
 
-    load();
-  </script>
+    render();
+  } catch(e) {
+    el.innerHTML = `<p class="error">Could not load pages: ${e.message}</p>`;
+  }
+}
+
+// ── edit mode ─────────────────────────────────────────────────────────────────
+
+document.getElementById('edit-btn').addEventListener('click', () => {
+  if (!editMode) {
+    if (!getToken()) { showModal(); return; }
+    enterEdit();
+  } else {
+    exitEdit(false);
+  }
+});
+
+document.getElementById('cancel-btn').addEventListener('click', () => exitEdit(false));
+document.getElementById('save-btn').addEventListener('click', saveChanges);
+
+function enterEdit() {
+  editMode = true;
+  document.getElementById('edit-btn').textContent = 'Done';
+  document.getElementById('edit-btn').classList.add('active');
+  document.getElementById('save-bar').classList.add('visible');
+  render();
+}
+
+function exitEdit(saved) {
+  editMode = false;
+  document.getElementById('edit-btn').textContent = 'Edit';
+  document.getElementById('edit-btn').classList.remove('active');
+  document.getElementById('save-bar').classList.remove('visible');
+  document.getElementById('save-status').textContent = '';
+  render();
+}
+
+function collectEdits() {
+  const cards = document.querySelectorAll('.card.editing');
+  const result = [];
+  cards.forEach(card => {
+    const file = card.dataset.file;
+    const name = card.querySelector('.f-name').value.trim();
+    const desc = card.querySelector('.f-desc').value.trim();
+    const order = parseInt(card.querySelector('.f-order').value) || 999;
+    result.push({ file, ...(name && {name}), ...(desc && {desc}), order });
+  });
+  return result;
+}
+
+async function saveChanges() {
+  const status = document.getElementById('save-status');
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  status.textContent = 'Saving…';
+
+  manifest = collectEdits();
+  const token = getToken();
+  const content = btoa(JSON.stringify(manifest, null, 2));
+
+  const body = {
+    message: 'update manifest',
+    content,
+    ...(manifestSha && { sha: manifestSha })
+  };
+
+  try {
+    const res = await fetch(API_CONTENTS + MANIFEST, {
+      method: 'PUT',
+      headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (res.status === 401) {
+      status.textContent = '';
+      btn.disabled = false;
+      showModal('Token expired or invalid. Enter a new one.');
+      return;
+    }
+    if (!res.ok) throw new Error(`Save failed: ${res.status}`);
+
+    const data = await res.json();
+    manifestSha = data.content.sha;
+    status.textContent = 'Saved!';
+    setTimeout(() => { status.textContent = ''; }, 2000);
+  } catch(e) {
+    status.textContent = `Error: ${e.message}`;
+  }
+  btn.disabled = false;
+}
+
+// ── token modal ───────────────────────────────────────────────────────────────
+
+function showModal(errMsg) {
+  const overlay = document.getElementById('modal-overlay');
+  const err = document.getElementById('modal-err');
+  document.getElementById('token-input').value = getToken() || '';
+  err.style.display = errMsg ? 'block' : 'none';
+  err.textContent = errMsg || '';
+  overlay.classList.add('visible');
+  setTimeout(() => document.getElementById('token-input').focus(), 50);
+}
+
+document.getElementById('modal-cancel').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.remove('visible');
+});
+
+document.getElementById('modal-save').addEventListener('click', async () => {
+  const token = document.getElementById('token-input').value.trim();
+  if (!token) return;
+  const err = document.getElementById('modal-err');
+  // quick verify
+  const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}`, { headers: authHeaders(token) });
+  if (!res.ok) {
+    err.textContent = 'Invalid token or no access to this repo.';
+    err.style.display = 'block';
+    return;
+  }
+  setToken(token);
+  document.getElementById('modal-overlay').classList.remove('visible');
+  enterEdit();
+});
+
+document.getElementById('token-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('modal-save').click();
+});
+
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').classList.remove('visible');
+});
+
+// ── init ──────────────────────────────────────────────────────────────────────
+load();
+</script>
 </body>
 </html>
