@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Scimplify DB ERD</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#f1f5f9;color:#0f172a;height:100vh;overflow:hidden}
+/* HEADER */
+#bar{position:fixed;inset:0 0 auto 0;z-index:100;background:#fff;border-bottom:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+#r1{height:46px;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid #f1f5f9}
+#r2{height:38px;display:flex;align-items:center;gap:8px;padding:0 14px;background:#f8fafc}
+.logo{font-weight:700;font-size:14px;color:#0f172a;white-space:nowrap;flex-shrink:0}
+.logo b{color:#2563eb}
+.sep{width:1px;height:18px;background:#e2e8f0;flex-shrink:0}
+/* DB tabs */
+.tabs{display:flex;gap:3px;flex-shrink:0}
+.tab{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;color:#64748b;border:1px solid transparent;transition:all .12s;white-space:nowrap}
+.tab:hover{background:#f1f5f9;border-color:#e2e8f0}
+.tab.on{border-color:currentColor}
+/* toggle */
+#tog{display:flex;border:1px solid #e2e8f0;border-radius:5px;overflow:hidden;flex-shrink:0}
+.togbtn{padding:4px 11px;font-size:11px;font-weight:600;cursor:pointer;border:none;outline:none;transition:all .12s;font-family:'Inter',sans-serif;white-space:nowrap}
+/* refresh */
+#rfsh{padding:4px 11px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #e2e8f0;border-radius:5px;background:#f8fafc;color:#475569;display:flex;align-items:center;gap:5px;transition:all .12s;font-family:'Inter',sans-serif;white-space:nowrap;flex-shrink:0}
+#rfsh:hover{background:#eff6ff;border-color:#bfdbfe;color:#2563eb}
+#rfsh.spinning svg{animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* stats */
+#stat{font-size:10px;color:#94a3b8;margin-left:auto;white-space:nowrap;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+/* search row */
+.sw{position:relative;display:flex;align-items:center;flex-shrink:0}
+.sw svg{position:absolute;left:7px;pointer-events:none;color:#94a3b8}
+#srch{padding:4px 8px 4px 24px;border:1px solid #e2e8f0;border-radius:5px;font-size:11px;font-family:'JetBrains Mono',monospace;outline:none;background:#fff;width:190px;color:#0f172a}
+#srch:focus{border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.1)}
+#srch::placeholder{color:#94a3b8}
+#smode{display:flex;border:1px solid #e2e8f0;border-radius:5px;overflow:hidden;flex-shrink:0}
+.sm{padding:3px 8px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:#f8fafc;color:#64748b;font-family:'Inter',sans-serif}
+.sm.on{background:#2563eb;color:#fff}
+.legend{display:flex;gap:8px;align-items:center;font-size:10px;color:#64748b;flex-shrink:0}
+.li{display:flex;align-items:center;gap:4px}
+kbd{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:3px;padding:1px 4px;font-size:9px;font-family:'JetBrains Mono',monospace;color:#475569}
+.hint{font-size:10px;color:#94a3b8;white-space:nowrap;flex-shrink:0}
+/* CANVAS */
+#cv{position:fixed;top:84px;inset-inline:0;bottom:0;overflow:hidden;cursor:grab;background:#f1f5f9}
+#cv.drag{cursor:grabbing}
+#stage{position:absolute;transform-origin:0 0}
+#esvg{position:absolute;top:0;left:0;pointer-events:none;overflow:visible}
+/* ENTITY */
+.ent{position:absolute;border-radius:7px;border:1.5px solid;background:#fff;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.07);transition:box-shadow .12s}
+.ent:hover{box-shadow:0 4px 14px rgba(0,0,0,.13)}
+.ent.sel{box-shadow:0 0 0 3px rgba(37,99,235,.45);z-index:30}
+.ent.conn{box-shadow:0 0 0 2px rgba(99,102,241,.5);z-index:20}
+.ent.fade{opacity:.18}
+.ent.shi{box-shadow:0 0 0 3px rgba(234,179,8,.6);z-index:20}
+.ent.sdim{opacity:.15}
+.eh{padding:6px 9px;font-size:10px;font-weight:700;border-bottom:1px solid rgba(0,0,0,.06);border-radius:5px 5px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}
+.esch{font-size:8px;font-weight:500;opacity:.55;flex-shrink:0}
+.etag{font-size:7px;font-weight:700;padding:1px 4px;border-radius:2px;margin-left:auto;flex-shrink:0}
+.eb{padding:3px 8px 6px}
+.ec{font-size:9.5px;padding:1px 0;display:flex;align-items:center;gap:3px;font-family:'JetBrains Mono',monospace;white-space:nowrap;color:#374151}
+.ec.pk{color:#2563eb;font-weight:600}
+.ec.fk{color:#7c3aed}
+.ec.cm{background:#fef9c3;border-radius:2px}
+.ebdg{font-size:7px;font-weight:700;min-width:15px;text-align:center;border-radius:2px;padding:0 2px}
+.ebdg.pk{background:#dbeafe;color:#1d4ed8}
+.ebdg.fk{background:#ede9fe;color:#6d28d9}
+.emore{font-size:8px;color:#94a3b8;padding:1px 0 2px;font-style:italic}
+/* SIDE PANEL */
+#panel{position:fixed;top:84px;left:0;bottom:0;width:280px;background:#fff;border-right:1px solid #e2e8f0;overflow-y:auto;display:none;z-index:50;box-shadow:2px 0 8px rgba(0,0,0,.05)}
+#panel.open{display:block}
+.ph{padding:14px 14px 10px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between}
+.pname{font-weight:700;font-size:14px}
+.px{background:none;border:none;cursor:pointer;font-size:18px;color:#94a3b8;line-height:1;padding:0}
+.pmeta{font-size:10px;color:#64748b;padding:8px 14px;border-bottom:1px solid #f1f5f9;line-height:1.6;font-family:'JetBrains Mono',monospace}
+.psec{padding:10px 14px 6px;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px}
+.plink{display:inline-block;font-size:10px;color:#2563eb;cursor:pointer;text-decoration:underline;margin-right:6px;margin-bottom:3px;font-family:'JetBrains Mono',monospace}
+.pcols{max-height:220px;overflow-y:auto;margin:0 14px 10px;border:1px solid #f1f5f9;border-radius:5px}
+.pcol{padding:3px 8px;display:flex;gap:5px;align-items:center;border-bottom:1px solid #f8fafc;font-size:10px;font-family:'JetBrains Mono',monospace}
+.pzbtn{margin:10px 14px;padding:5px 12px;border-radius:5px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;font-size:10px;font-family:'Inter',sans-serif;font-weight:600;color:#475569}
+.pzbtn:hover{background:#eff6ff;border-color:#bfdbfe;color:#2563eb}
+/* SEARCH RESULTS */
+#srp{position:fixed;top:84px;right:0;bottom:0;width:270px;background:#fff;border-left:1px solid #e2e8f0;overflow-y:auto;display:none;z-index:50;box-shadow:-2px 0 8px rgba(0,0,0,.05)}
+#srp.open{display:block}
+.srph{padding:10px 14px;font-size:11px;font-weight:600;color:#64748b;border-bottom:1px solid #f1f5f9;background:#f8fafc}
+.sri{padding:8px 14px;border-bottom:1px solid #f8fafc;cursor:pointer}
+.sri:hover{background:#f8fafc}
+.srin{font-weight:600;font-size:11px;font-family:'JetBrains Mono',monospace}
+.srdb{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:5px}
+.srcm{font-size:10px;color:#64748b;margin-top:2px;font-family:'JetBrains Mono',monospace}
+.srcmhi{color:#2563eb;font-weight:600}
+.srpe{padding:20px 14px;text-align:center;font-size:11px;color:#94a3b8}
+/* MINIMAP */
+#mm{position:fixed;bottom:14px;right:14px;width:170px;height:106px;background:rgba(255,255,255,.95);border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;z-index:90;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+#mmc{width:100%;height:100%}
+#mmv{position:absolute;border:2px solid rgba(37,99,235,.5);border-radius:2px;background:rgba(37,99,235,.04);pointer-events:none}
+/* BADGE */
+#badge{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,.75);color:rgba(255,255,255,.7);font-size:9px;padding:4px 10px;border-radius:20px;z-index:90;font-family:'JetBrains Mono',monospace;letter-spacing:.3px;backdrop-filter:blur(4px);pointer-events:none}
+/* scrollbar */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     HOW TO USE THIS FILE
+     ───────────────────────────────────────────────────
+     DATA SECTION (below):  SCHEMA_DATA is the single
+     source of truth. It is a plain JS object with 4 keys:
+       ions / scinode / sourcing / nucleus
+
+     Each DB has:
+       .tables  — object of table_name → {pk, cols:[{n,t,pk,fk}]}
+       .fks     — array of [fromTable, fromCol, toTable, toCol]
+       .key     — array of "key table" names shown in Key mode
+       .label   — human-readable DB name
+       .color   — hex accent color
+
+     TO REFRESH DATA:
+       1. Run the SQL in each MCP server (mssql-*-dev):
+            SELECT t.name, c.name, tp.name, CASE WHEN pk... END
+            FROM sys.tables t JOIN sys.columns c ...
+       2. Paste results into buildSchema() below
+       3. Click "↺ Refresh" button in the header
+          — it re-reads SCHEMA_DATA and redraws everything
+
+     TO ADD A NEW DB:
+       Add a new key to SCHEMA_DATA with same structure.
+     ═══════════════════════════════════════════════════ -->
+
+<div id="bar">
+  <div id="r1">
+    <div class="logo">Sci<b>mplify</b> · DB ERD</div>
+    <div class="sep"></div>
+    <div class="tabs" id="tabs"></div>
+    <div class="sep"></div>
+    <div id="tog">
+      <button class="togbtn" id="tbk" onclick="setMode('key')">Key Tables</button>
+      <button class="togbtn" id="tba" onclick="setMode('all')" style="border-left:1px solid #e2e8f0">All Tables</button>
+    </div>
+    <button id="rfsh" onclick="refresh()">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      Refresh
+    </button>
+    <span id="stat">—</span>
+  </div>
+  <div id="r2">
+    <div class="sw">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="left:7px"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+      <input id="srch" placeholder="Search table or column…" oninput="doSearch(this.value)">
+    </div>
+    <div id="smode">
+      <button class="sm on" id="sm-table" onclick="setSM('table')">Table</button>
+      <button class="sm" id="sm-column" onclick="setSM('column')">Column</button>
+      <button class="sm" id="sm-both" onclick="setSM('both')">Both</button>
+    </div>
+    <div class="sep"></div>
+    <div class="legend">
+      <div class="li"><svg width="16" height="3"><line x1="0" y1="1.5" x2="16" y2="1.5" stroke="#475569" stroke-width="1.5"/></svg>FK</div>
+      <div class="li"><svg width="16" height="3"><line x1="0" y1="1.5" x2="16" y2="1.5" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4,3"/></svg>Cross-DB</div>
+      <span style="background:#dbeafe;color:#1d4ed8;font-size:8px;font-weight:700;padding:1px 4px;border-radius:2px">PK</span>
+      <span style="background:#ede9fe;color:#6d28d9;font-size:8px;font-weight:700;padding:1px 4px;border-radius:2px">FK</span>
+    </div>
+    <div class="sep"></div>
+    <div class="hint"><kbd>Scroll</kbd> zoom &nbsp;<kbd>Drag</kbd> pan &nbsp;<kbd>Click</kbd> select &nbsp;<kbd>Dbl</kbd> zoom-to &nbsp;<kbd>Esc</kbd> clear</div>
+  </div>
+</div>
+
+<div id="cv"><div id="stage"><svg id="esvg"></svg></div></div>
+
+<div id="panel">
+  <div class="ph">
+    <div class="pname" id="pname">—</div>
+    <button class="px" onclick="clearSel()">&times;</button>
+  </div>
+  <div class="pmeta" id="pmeta"></div>
+  <div id="pbody"></div>
+</div>
+
+<div id="srp">
+  <div class="srph" id="srph">Results</div>
+  <div id="srpb"></div>
+</div>
+
+<div id="mm"><canvas id="mmc" width="170" height="106"></canvas><div id="mmv"></div></div>
+<div id="badge">Built by Maheswaran B &middot; Last updated Jun 04, 2026</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 1 — SCHEMA DATA
+   ───────────────────────────────────────────────────────────────
+   This is the ONLY place you need to edit to update the schema.
+   Each entry mirrors exactly what sys.tables + sys.columns returns.
+   ─── To refresh: run the SQL queries against the MCP servers,
+       rebuild this object, then click "↺ Refresh" in the UI.
+   ═══════════════════════════════════════════════════════════════ */
+var SCHEMA_DATA = {
+
+  /* ── ions_dev ── mssql-ions-dev ── 22 tables (live as of 2026-06-04) ── */
+  ions: {
+    label: 'ions_dev', color: '#b45309',
+    bg:'#fffbeb', bd:'#fcd34d', hdr:'#fef3c7',
+    key: ['companies','users','labs','equipments','expertise','products',
+          'projects','proposals','licenses','patents','internal_cro_projects',
+          'company_details','company_onboarding_progress',
+          'supplier_contacts','buyer_contacts','category'],
+    fks: [
+      ['category','company_id','companies','id'],
+      ['companies','admin_approved_by','users','user_id'],
+      ['company_details','company_id','companies','id'],
+      ['Company_Email','CompanyID','companies','id'],
+      ['company_onboarding_progress','company_id','companies','id'],
+      ['expertise','company_id','companies','id'],
+      ['file_upload_logs','company_id','companies','id'],
+      ['labs','company_id','companies','id'],
+      ['licenses','company_id','companies','id'],
+      ['onboarding_step_history','company_id','companies','id'],
+      ['patents','company_id','companies','id'],
+      ['products','company_id','companies','id'],
+      ['projects','company_id','companies','id'],
+      ['proposals','company_id','companies','id'],
+      ['proposals','project_id','internal_cro_projects','id'],
+      ['proposals','reviewed_by','users','user_id'],
+      ['proposals','supplier_id','users','user_id'],
+      ['user_logs','user_id','users','user_id']
+    ],
+    tables: {
+      companies:                  {pk:'id',        cols:[{n:'id',t:'int',pk:true},{n:'company_name',t:'nvarchar'},{n:'gst_number',t:'nvarchar'},{n:'website',t:'nvarchar'},{n:'phone_number',t:'nvarchar'},{n:'admin_approval_status',t:'nvarchar'},{n:'admin_approved_by',t:'int',fk:true},{n:'logo_url',t:'nvarchar'},{n:'created_at',t:'datetime'}]},
+      users:                      {pk:'user_id',   cols:[{n:'user_id',t:'int',pk:true},{n:'full_name',t:'nvarchar'},{n:'email',t:'nvarchar'},{n:'phone',t:'nvarchar'},{n:'is_active',t:'bit'},{n:'is_verified',t:'bit'},{n:'company_id',t:'int',fk:true},{n:'role',t:'varchar'},{n:'created_at',t:'datetime'}]},
+      labs:                       {pk:'lab_id',    cols:[{n:'lab_id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'lab_location',t:'nvarchar'},{n:'headquarters_address',t:'text'},{n:'created_at',t:'datetime'}]},
+      equipments:                 {pk:'equipment_id',cols:[{n:'equipment_id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'equipment_name',t:'nvarchar'}]},
+      expertise:                  {pk:'expertise_id',cols:[{n:'expertise_id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'expertise_name',t:'nvarchar'},{n:'created_at',t:'datetime'}]},
+      products:                   {pk:'product_id',cols:[{n:'product_id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'product_name',t:'nvarchar'},{n:'link',t:'nvarchar'},{n:'created_at',t:'datetime'}]},
+      projects:                   {pk:'project_id',cols:[{n:'project_id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'project_name',t:'nvarchar'},{n:'link',t:'nvarchar'},{n:'is_exclusive',t:'bit'},{n:'created_at',t:'datetime'}]},
+      proposals:                  {pk:'proposal_id',cols:[{n:'proposal_id',t:'int',pk:true},{n:'supplier_id',t:'int',fk:true},{n:'project_id',t:'int',fk:true},{n:'company_id',t:'int',fk:true},{n:'title',t:'nvarchar'},{n:'estimated_cost',t:'float'},{n:'currency',t:'nvarchar'},{n:'status',t:'nvarchar'},{n:'submitted_at',t:'datetime2'},{n:'reviewed_by',t:'int',fk:true}]},
+      licenses:                   {pk:'license_id',cols:[{n:'license_id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'license_name',t:'nvarchar'},{n:'link',t:'nvarchar'}]},
+      patents:                    {pk:'patent_id', cols:[{n:'patent_id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'patent_name',t:'nvarchar'},{n:'link',t:'nvarchar'}]},
+      internal_cro_projects:      {pk:'id',        cols:[{n:'id',t:'int',pk:true},{n:'product_name',t:'varchar'},{n:'cas_number',t:'varchar'},{n:'nature',t:'varchar'},{n:'proj_id',t:'varchar'},{n:'status',t:'nvarchar'},{n:'company_id',t:'varchar'},{n:'is_exclusive',t:'bit'},{n:'created_at',t:'datetime'}]},
+      company_details:            {pk:'id',        cols:[{n:'id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'owner_name',t:'nvarchar'},{n:'no_of_employees',t:'varchar'},{n:'company_type',t:'varchar'},{n:'year_established',t:'int'},{n:'headquarters_address',t:'varchar'},{n:'country',t:'nvarchar'}]},
+      company_onboarding_progress:{pk:'id',        cols:[{n:'id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'current_step',t:'nvarchar'},{n:'overall_status',t:'nvarchar'},{n:'progress_percentage',t:'int'},{n:'terms_accepted',t:'bit'}]},
+      supplier_contacts:          {pk:'id',        cols:[{n:'id',t:'int',pk:true},{n:'full_name',t:'nvarchar'},{n:'official_email',t:'nvarchar'},{n:'phone_number',t:'nvarchar'},{n:'company_name',t:'nvarchar'},{n:'expertise',t:'nvarchar'},{n:'is_processed',t:'bit'}]},
+      buyer_contacts:             {pk:'id',        cols:[{n:'id',t:'int',pk:true},{n:'full_name',t:'nvarchar'},{n:'official_email',t:'nvarchar'},{n:'phone_number',t:'nvarchar'},{n:'company_name',t:'nvarchar'},{n:'target_molecule',t:'nvarchar'},{n:'is_processed',t:'bit'},{n:'created_at',t:'datetime2'}]},
+      category:                   {pk:'category_id',cols:[{n:'category_id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'category_name',t:'nvarchar'},{n:'created_at',t:'datetime'}]},
+      Company_Email:              {pk:'EmailID',   cols:[{n:'EmailID',t:'int',pk:true},{n:'CompanyID',t:'int',fk:true},{n:'EmailAddress',t:'nvarchar'},{n:'IsPrimary',t:'bit'}]},
+      onboarding_step_history:    {pk:'id',        cols:[{n:'id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'step',t:'nvarchar'},{n:'status',t:'nvarchar'},{n:'completed_at',t:'datetime2'}]},
+      product_description:        {pk:'id',        cols:[{n:'id',t:'int',pk:true},{n:'product_id',t:'int',fk:true},{n:'product_name',t:'nvarchar'},{n:'background',t:'nvarchar'},{n:'benefits',t:'text'},{n:'applications',t:'text'}]},
+      supplier_cms_audit_log:     {pk:'id',        cols:[{n:'id',t:'bigint',pk:true},{n:'supplier_id',t:'bigint'},{n:'changed_by_user_id',t:'int'},{n:'table_name',t:'nvarchar'},{n:'field_name',t:'nvarchar'},{n:'old_value',t:'nvarchar'},{n:'new_value',t:'nvarchar'},{n:'created_at',t:'datetime2'}]},
+      user_logs:                  {pk:null,        cols:[{n:'id',t:'int'},{n:'user_id',t:'int',fk:true},{n:'login_time',t:'datetime'}]},
+      file_upload_logs:           {pk:'id',        cols:[{n:'id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'category',t:'nvarchar'},{n:'file_name',t:'nvarchar'},{n:'file_url',t:'nvarchar'},{n:'upload_step',t:'nvarchar'},{n:'uploaded_at',t:'datetime2'}]}
+    }
+  },
+
+  /* ── scinode_dev ── mssql-scinode-dev ── key tables shown ── */
+  scinode: {
+    label: 'scinode_dev', color: '#047857',
+    bg:'#ecfdf5', bd:'#6ee7b7', hdr:'#d1fae5',
+    key: ['companies','users','requests','request_details','request_quotes',
+          'request_quote_items','request_assignments','request_stage_details',
+          'request_stage_definitions','request_status_history','proposals',
+          'projects','internal_cro_projects','suppliers','manufacturers_v1',
+          'supplier_profiles','products','billing_subscription','billing_usage',
+          'permission_groups','permissions','user_permission_groups',
+          'analytics_events','analytics_sessions',
+          'sci.suppliers','sci.products','sci.supplier_products',
+          'sci.supplier_assets','sci.supplier_certificates','sci.supplier_reactions',
+          'sci.supplier_contacts','sci.catalog','sci.product_chemical_identity'],
+    fks: [
+      ['analytics_sessions','user_id','users','user_id'],
+      ['billing_subscription','company_id','companies','id'],
+      ['billing_usage','company_id','companies','id'],
+      ['companies','manufacturer_id','manufacturers_v1','manufacturer_id'],
+      ['company_details','company_id','companies','id'],
+      ['file_upload_logs','company_id','companies','id'],
+      ['file_upload_logs','user_id','users','user_id'],
+      ['manufacturers_v1','assigned_owner_user_id','users','user_id'],
+      ['order_status_log','request_id','requests','id'],
+      ['permission_group_items','group_id','permission_groups','id'],
+      ['permission_group_items','permission_id','permissions','id'],
+      ['proposals','company_id','companies','id'],
+      ['proposals','project_id','internal_cro_projects','id'],
+      ['proposals','reviewed_by','users','user_id'],
+      ['proposals','supplier_id','users','user_id'],
+      ['project_cro_invites','project_id','internal_cro_projects','id'],
+      ['project_cro_invites','user_id','users','user_id'],
+      ['projects','company_id','companies','id'],
+      ['request_assignments','request_id','requests','id'],
+      ['request_details','request_id','requests','id'],
+      ['request_quote_items','quote_id','request_quotes','id'],
+      ['request_quotes','request_id','requests','id'],
+      ['request_stage_details','request_id','requests','id'],
+      ['request_stage_details','stage_code','request_stage_definitions','stage_code'],
+      ['request_status_history','request_id','requests','id'],
+      ['requests','origin_request_id','requests','id'],
+      ['supplier_profiles','company_id','companies','id'],
+      ['user_activity_logs','user_id','users','user_id'],
+      ['user_logs','user_id','users','user_id'],
+      ['user_permission_groups','user_id','users','user_id'],
+      ['user_permission_groups','group_id','permission_groups','id'],
+      ['user_projects','user_id','users','user_id'],
+      ['sci.catalog_supplier_mapping','catalog_id','sci.catalog','id'],
+      ['sci.catalog_supplier_mapping','supplier_id','sci.suppliers','supplier_id'],
+      ['sci.product_chemical_identity','product_id','sci.products','product_id'],
+      ['sci.product_properties','product_id','sci.products','product_id'],
+      ['sci.supplier_assets','supplier_id','sci.suppliers','supplier_id'],
+      ['sci.supplier_certificates','supplier_id','sci.suppliers','supplier_id'],
+      ['sci.supplier_contacts','supplier_id','sci.suppliers','supplier_id'],
+      ['sci.supplier_products','supplier_id','sci.suppliers','supplier_id'],
+      ['sci.supplier_products','product_id','sci.products','product_id'],
+      ['sci.supplier_reactions','supplier_id','sci.suppliers','supplier_id']
+    ],
+    tables: {
+      companies:               {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'type',t:'nvarchar'},{n:'manufacturer_id',t:'int',fk:true},{n:'created_at',t:'datetime'}]},
+      users:                   {pk:'user_id',    cols:[{n:'user_id',t:'int',pk:true},{n:'full_name',t:'nvarchar'},{n:'email',t:'nvarchar'},{n:'company_id',t:'int',fk:true},{n:'role',t:'nvarchar'},{n:'is_active',t:'bit'},{n:'created_at',t:'datetime'}]},
+      requests:                {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'request_type',t:'nvarchar'},{n:'company_id',t:'int',fk:true},{n:'user_id',t:'int',fk:true},{n:'product_name',t:'nvarchar'},{n:'cas_number',t:'varchar'},{n:'quantity',t:'decimal'},{n:'unit',t:'varchar'},{n:'status',t:'nvarchar'},{n:'origin_request_id',t:'int',fk:true},{n:'created_at',t:'datetime'}]},
+      request_details:         {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'request_id',t:'int',fk:true},{n:'field_key',t:'nvarchar'},{n:'field_value',t:'nvarchar'}]},
+      request_quotes:          {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'request_id',t:'int',fk:true},{n:'price_per_unit',t:'decimal'},{n:'currency',t:'varchar'},{n:'lead_time',t:'varchar'},{n:'status',t:'nvarchar'}]},
+      request_quote_items:     {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'quote_id',t:'int',fk:true},{n:'quantity',t:'decimal'},{n:'unit',t:'varchar'},{n:'price',t:'decimal'}]},
+      request_assignments:     {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'request_id',t:'int',fk:true},{n:'assigned_to',t:'int',fk:true},{n:'assigned_at',t:'datetime'}]},
+      request_stage_details:   {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'request_id',t:'int',fk:true},{n:'stage_code',t:'varchar',fk:true},{n:'content_json',t:'nvarchar'},{n:'updated_at',t:'datetime'}]},
+      request_stage_definitions:{pk:'stage_code',cols:[{n:'stage_code',t:'varchar',pk:true},{n:'label',t:'nvarchar'},{n:'sort_order',t:'int'},{n:'request_types',t:'nvarchar'}]},
+      request_status_history:  {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'request_id',t:'int',fk:true},{n:'old_status',t:'nvarchar'},{n:'new_status',t:'nvarchar'},{n:'changed_at',t:'datetime'}]},
+      proposals:               {pk:'proposal_id',cols:[{n:'proposal_id',t:'int',pk:true},{n:'supplier_id',t:'int',fk:true},{n:'project_id',t:'int',fk:true},{n:'company_id',t:'int',fk:true},{n:'estimated_cost',t:'float'},{n:'currency',t:'nvarchar'},{n:'status',t:'nvarchar'},{n:'reviewed_by',t:'int',fk:true}]},
+      projects:                {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'name',t:'nvarchar'},{n:'status',t:'nvarchar'},{n:'created_at',t:'datetime'}]},
+      internal_cro_projects:   {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'product_name',t:'varchar'},{n:'cas_number',t:'varchar'},{n:'proj_id',t:'varchar'},{n:'status',t:'nvarchar'},{n:'is_exclusive',t:'bit'}]},
+      suppliers:               {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'type',t:'nvarchar'},{n:'country',t:'varchar'},{n:'is_verified',t:'bit'}]},
+      manufacturers_v1:        {pk:'manufacturer_id',cols:[{n:'manufacturer_id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'country',t:'varchar'},{n:'assigned_owner_user_id',t:'int',fk:true},{n:'is_verified',t:'bit'}]},
+      supplier_profiles:       {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'headline',t:'nvarchar'},{n:'description',t:'nvarchar'}]},
+      products:                {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'name',t:'nvarchar'},{n:'cas_number',t:'varchar'}]},
+      billing_subscription:    {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'plan_name',t:'varchar'},{n:'status',t:'nvarchar'},{n:'started_at',t:'datetime'},{n:'expires_at',t:'datetime'}]},
+      billing_usage:           {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'company_id',t:'int',fk:true},{n:'feature',t:'varchar'},{n:'usage_count',t:'int'},{n:'period',t:'varchar'}]},
+      permission_groups:       {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'description',t:'nvarchar'}]},
+      permissions:             {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'code',t:'varchar'},{n:'description',t:'nvarchar'},{n:'module',t:'varchar'}]},
+      permission_group_items:  {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'group_id',t:'int',fk:true},{n:'permission_id',t:'int',fk:true}]},
+      user_permission_groups:  {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'user_id',t:'int',fk:true},{n:'group_id',t:'int',fk:true},{n:'assigned_by',t:'int',fk:true},{n:'assigned_at',t:'datetime'}]},
+      analytics_events:        {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'user_id',t:'int',fk:true},{n:'event_type',t:'varchar'},{n:'event_data',t:'nvarchar'},{n:'created_at',t:'datetime'}]},
+      analytics_sessions:      {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'user_id',t:'int',fk:true},{n:'started_at',t:'datetime'},{n:'ended_at',t:'datetime'}]},
+      user_logs:               {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'user_id',t:'int',fk:true},{n:'action',t:'varchar'},{n:'created_at',t:'datetime'}]},
+      user_activity_logs:      {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'user_id',t:'int',fk:true},{n:'activity_type',t:'varchar'},{n:'created_at',t:'datetime'}]},
+      user_projects:           {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'user_id',t:'int',fk:true},{n:'project_id',t:'int',fk:true},{n:'role',t:'varchar'}]},
+      project_cro_invites:     {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'project_id',t:'int',fk:true},{n:'user_id',t:'int',fk:true},{n:'invited_by',t:'int',fk:true},{n:'status',t:'varchar'}]},
+      order_status_log:        {pk:'id',         cols:[{n:'id',t:'int',pk:true},{n:'request_id',t:'int',fk:true},{n:'old_status',t:'nvarchar'},{n:'new_status',t:'nvarchar'},{n:'changed_at',t:'datetime'}]},
+      // sci schema
+      'sci.suppliers':         {pk:'supplier_id',schema:'sci',cols:[{n:'supplier_id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'country',t:'varchar'},{n:'city',t:'varchar'},{n:'is_manufacturer',t:'bit'},{n:'is_verified',t:'bit'}]},
+      'sci.products':          {pk:'product_id', schema:'sci',cols:[{n:'product_id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'cas_number',t:'varchar'},{n:'iupac_name',t:'nvarchar'},{n:'molecular_formula',t:'varchar'}]},
+      'sci.catalog':           {pk:'id',         schema:'sci',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'catalog_type',t:'varchar'},{n:'description',t:'nvarchar'}]},
+      'sci.catalog_supplier_mapping':{pk:'id',   schema:'sci',cols:[{n:'id',t:'int',pk:true},{n:'catalog_id',t:'int',fk:true},{n:'supplier_id',t:'int',fk:true}]},
+      'sci.supplier_products': {pk:'id',         schema:'sci',cols:[{n:'id',t:'int',pk:true},{n:'supplier_id',t:'int',fk:true},{n:'product_id',t:'int',fk:true},{n:'grade',t:'varchar'},{n:'purity',t:'varchar'},{n:'min_order_qty',t:'decimal'}]},
+      'sci.supplier_assets':   {pk:'asset_id',   schema:'sci',cols:[{n:'asset_id',t:'int',pk:true},{n:'supplier_id',t:'int',fk:true},{n:'asset_type_id',t:'int',fk:true},{n:'name',t:'nvarchar'},{n:'capacity',t:'varchar'}]},
+      'sci.supplier_certificates':{pk:'id',      schema:'sci',cols:[{n:'id',t:'int',pk:true},{n:'supplier_id',t:'int',fk:true},{n:'certificate_id',t:'int',fk:true},{n:'issued_at',t:'date'},{n:'expires_at',t:'date'}]},
+      'sci.supplier_reactions':{pk:'id',         schema:'sci',cols:[{n:'id',t:'int',pk:true},{n:'supplier_id',t:'int',fk:true},{n:'reaction_id',t:'int',fk:true},{n:'notes',t:'nvarchar'}]},
+      'sci.supplier_contacts': {pk:'id',         schema:'sci',cols:[{n:'id',t:'int',pk:true},{n:'supplier_id',t:'int',fk:true},{n:'contact_type',t:'varchar',fk:true},{n:'name',t:'nvarchar'},{n:'email',t:'varchar'},{n:'phone',t:'varchar'}]},
+      'sci.product_chemical_identity':{pk:'id',  schema:'sci',cols:[{n:'id',t:'int',pk:true},{n:'product_id',t:'int',fk:true},{n:'smiles',t:'varchar'},{n:'inchi',t:'varchar'},{n:'molecular_weight',t:'decimal'}]},
+      'sci.product_properties':{pk:'id',         schema:'sci',cols:[{n:'id',t:'int',pk:true},{n:'product_id',t:'int',fk:true},{n:'property_key',t:'varchar'},{n:'value',t:'nvarchar'},{n:'unit',t:'varchar'}]}
+    }
+  },
+
+  /* ── sourcing_dev ── mssql-sourcing-dev ── 93 tables (live 2026-06-04) ── */
+  sourcing: {
+    label: 'sourcing_dev', color: '#1d4ed8',
+    bg:'#eff6ff', bd:'#93c5fd', hdr:'#dbeafe',
+    key: ['rfqs','rfq_items','rfq_mailer_logs','sourcing_tickets',
+          'sourcing_tickets_history','tickets_suggested_suppliers',
+          'sm_suppliers','sm_products','sm_supplier_contacts',
+          'supplier_contacts','supplier_quotes','supplier_quotes_history',
+          'product_supplier_mapping','products','quotations','quotation_items',
+          'employee_master','users','zoho_leadsv2','ZohoLeads',
+          'workflows','step_logs','pipeline_metadata','airflow_dag_runs',
+          'email_status','crm_enquiry_audit','crm_sync_metadata',
+          'zoho_sync_metadata','zoho_desk_users','roles','departments'],
+    fks: [
+      ['step_logs','user_id','users','id'],
+      ['user_logs','user_id','users','id']
+    ],
+    tables: {
+      rfqs:                    {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_name',t:'varchar'},{n:'cas_number',t:'varchar'},{n:'quantity',t:'decimal'},{n:'unit',t:'varchar'},{n:'status',t:'nvarchar'},{n:'created_by',t:'int',fk:true},{n:'created_at',t:'datetime'}]},
+      rfq_items:               {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'rfq_id',t:'int',fk:true},{n:'product_name',t:'varchar'},{n:'quantity',t:'decimal'},{n:'unit',t:'varchar'}]},
+      rfq_mailer_logs:         {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'rfq_id',t:'int',fk:true},{n:'supplier_id',t:'int',fk:true},{n:'email',t:'varchar'},{n:'sent_at',t:'datetime'},{n:'delivery_status',t:'nvarchar'},{n:'opened_at',t:'datetime'},{n:'responded_at',t:'datetime'}]},
+      rfq_mailer_logs_temp1:   {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'rfq_id',t:'int'},{n:'supplier_id',t:'int'},{n:'email',t:'varchar'}],type:'temp'},
+      rfq_mailer_logs_temp2:   {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'rfq_id',t:'int'},{n:'supplier_id',t:'int'},{n:'email',t:'varchar'}],type:'temp'},
+      sourcing_tickets:        {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_id',t:'int',fk:true},{n:'supplier_id',t:'int',fk:true},{n:'assignee_id',t:'int',fk:true},{n:'quantity',t:'decimal'},{n:'priority',t:'nvarchar'},{n:'status',t:'nvarchar'},{n:'created_at',t:'datetime'},{n:'closed_at',t:'datetime'}]},
+      sourcing_tickets_history:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'ticket_id',t:'int',fk:true},{n:'old_status',t:'nvarchar'},{n:'new_status',t:'nvarchar'},{n:'changed_at',t:'datetime'}]},
+      sourcing_tickets_backup_08012026:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_id',t:'int'},{n:'status',t:'nvarchar'}],type:'backup'},
+      sourcing_tickets_backup_18022026:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_id',t:'int'},{n:'status',t:'nvarchar'}],type:'backup'},
+      tickets_suggested_suppliers:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'ticket_id',t:'int',fk:true},{n:'supplier_id',t:'int',fk:true},{n:'score',t:'float'},{n:'suggested_at',t:'datetime'}]},
+      sm_suppliers:            {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'country',t:'varchar'},{n:'city',t:'varchar'},{n:'email',t:'varchar'},{n:'phone',t:'varchar'},{n:'website',t:'varchar'},{n:'is_active',t:'bit'},{n:'created_at',t:'datetime'}]},
+      sm_new_suppliers:        {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'country',t:'varchar'},{n:'email',t:'varchar'},{n:'created_at',t:'datetime'}]},
+      sm_products:             {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_name',t:'nvarchar'},{n:'cas_number',t:'varchar'},{n:'category',t:'nvarchar'},{n:'created_at',t:'datetime'}]},
+      sm_products_temp_3103:   {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_name',t:'nvarchar'},{n:'cas_number',t:'varchar'}],type:'temp'},
+      sm_supplier_contacts:    {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'supplier_id',t:'int',fk:true},{n:'name',t:'nvarchar'},{n:'email',t:'varchar'},{n:'phone',t:'varchar'},{n:'designation',t:'varchar'}]},
+      suppliers:               {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'country',t:'varchar'},{n:'email',t:'varchar'},{n:'is_active',t:'bit'}]},
+      suppliers_archived:      {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'archived_at',t:'datetime'}],type:'archive'},
+      suppliers_backup_13042026:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'country',t:'varchar'}],type:'backup'},
+      suppliers_backup_20250724:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'}],type:'backup'},
+      suppliers_backup_20250821:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'}],type:'backup'},
+      temp_suppliers:          {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'}],type:'temp'},
+      supplier_update_temp:    {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'supplier_id',t:'int'},{n:'field',t:'varchar'},{n:'new_val',t:'nvarchar'}],type:'temp'},
+      supplier_merge_log:      {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'source_supplier_id',t:'int'},{n:'target_supplier_id',t:'int'},{n:'merged_at',t:'datetime'}]},
+      supplier_grouping_details:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'group_name',t:'varchar'},{n:'supplier_ids',t:'nvarchar'},{n:'created_at',t:'datetime'}]},
+      supplier_contacts:       {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'supplier_id',t:'int',fk:true},{n:'name',t:'nvarchar'},{n:'email',t:'varchar'},{n:'phone',t:'varchar'},{n:'is_primary',t:'bit'}]},
+      supplier_contacts_archived:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'supplier_id',t:'int'},{n:'email',t:'varchar'}],type:'archive'},
+      supplier_contacts_backup_13042026:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'supplier_id',t:'int'},{n:'email',t:'varchar'}],type:'backup'},
+      supplier_contacts_backup_20250724:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'supplier_id',t:'int'}],type:'backup'},
+      supplier_contacts_backup_20250821:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'supplier_id',t:'int'}],type:'backup'},
+      temp_supplier_contacts:  {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'supplier_id',t:'int'},{n:'email',t:'varchar'}],type:'temp'},
+      supplier_quotes:         {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'rfq_id',t:'int',fk:true},{n:'supplier_id',t:'int',fk:true},{n:'price_per_unit',t:'decimal'},{n:'currency',t:'varchar'},{n:'lead_time',t:'varchar'},{n:'validity_date',t:'date'},{n:'status',t:'nvarchar'},{n:'received_at',t:'datetime'}]},
+      supplier_quotes_history: {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'quote_id',t:'int',fk:true},{n:'old_status',t:'nvarchar'},{n:'new_status',t:'nvarchar'},{n:'changed_at',t:'datetime'}]},
+      supplier_quotes_backup_13042026:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'rfq_id',t:'int'},{n:'supplier_id',t:'int'}],type:'backup'},
+      supplier_quotes_backup_20012026:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'rfq_id',t:'int'},{n:'supplier_id',t:'int'}],type:'backup'},
+      supplier_quote_backup_17122025:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'rfq_id',t:'int'},{n:'supplier_id',t:'int'}],type:'backup'},
+      supplier_quotes_products_mapped:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'quote_id',t:'int',fk:true},{n:'product_id',t:'int',fk:true}]},
+      Supplier_Quotes_suppliers_mapped:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'quote_id',t:'int',fk:true},{n:'supplier_id',t:'int',fk:true}]},
+      products:                {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'cas_number',t:'varchar'},{n:'category',t:'nvarchar'},{n:'synonyms',t:'nvarchar'},{n:'created_at',t:'datetime'}]},
+      products_backup_13042026:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'cas_number',t:'varchar'}],type:'backup'},
+      products_backup_20250724:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'}],type:'backup'},
+      products_backup_20250821:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'}],type:'backup'},
+      products_backup_30042026:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'}],type:'backup'},
+      products_temp_3103:      {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'cas_number',t:'varchar'}],type:'temp'},
+      products_update_temp:    {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_id',t:'int'},{n:'field',t:'varchar'},{n:'new_val',t:'nvarchar'}],type:'temp'},
+      products_update_temp2:   {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_id',t:'int'},{n:'field',t:'varchar'}],type:'temp'},
+      product_archived:        {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'archived_at',t:'datetime'}],type:'archive'},
+      product_and_id_temp:     {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_name',t:'nvarchar'},{n:'cas_number',t:'varchar'},{n:'external_id',t:'varchar'}],type:'temp'},
+      temp_products:           {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'cas_number',t:'varchar'}],type:'temp'},
+      product_supplier_mapping:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_id',t:'int',fk:true},{n:'supplier_id',t:'int',fk:true},{n:'is_preferred',t:'bit'},{n:'mapped_at',t:'datetime'}]},
+      product_supplier_mapping_archive:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_id',t:'int'},{n:'supplier_id',t:'int'}],type:'archive'},
+      product_supplier_mapping_backup_13042026:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_id',t:'int'},{n:'supplier_id',t:'int'}],type:'backup'},
+      product_supplier_mapping_backup_20250724:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_id',t:'int'}],type:'backup'},
+      product_supplier_mapping_backup_20250821:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_id',t:'int'}],type:'backup'},
+      product_supplier_mapping_temp_3103:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_id',t:'int'},{n:'supplier_id',t:'int'}],type:'temp'},
+      product_supplier_mapping_test:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_id',t:'int'},{n:'supplier_id',t:'int'}],type:'temp'},
+      product_grouping_details:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'group_name',t:'varchar'},{n:'product_ids',t:'nvarchar'},{n:'created_at',t:'datetime'}]},
+      quotations:              {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'rfq_id',t:'int',fk:true},{n:'supplier_id',t:'int',fk:true},{n:'total_value',t:'decimal'},{n:'currency',t:'varchar'},{n:'status',t:'nvarchar'}]},
+      quotation_items:         {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'quotation_id',t:'int',fk:true},{n:'product_name',t:'varchar'},{n:'quantity',t:'decimal'},{n:'price_per_unit',t:'decimal'}]},
+      store_search:            {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'search_query',t:'nvarchar'},{n:'user_id',t:'int'},{n:'results_count',t:'int'},{n:'searched_at',t:'datetime'}]},
+      store_search_temp_3103:  {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'search_query',t:'nvarchar'},{n:'results_count',t:'int'}],type:'temp'},
+      zoho_leadsv2:            {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'lead_id',t:'varchar'},{n:'email',t:'varchar'},{n:'company',t:'nvarchar'},{n:'status',t:'nvarchar'},{n:'source',t:'varchar'},{n:'created_at',t:'datetime'}]},
+      ZohoLeads:               {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'LeadId',t:'varchar'},{n:'Email',t:'varchar'},{n:'Company',t:'nvarchar'},{n:'Phone',t:'varchar'},{n:'Status',t:'nvarchar'}]},
+      zoho_sync_metadata:      {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'module',t:'varchar'},{n:'last_sync_at',t:'datetime'},{n:'records_synced',t:'int'},{n:'status',t:'nvarchar'}]},
+      zoho_desk_users:         {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'zoho_user_id',t:'varchar'},{n:'email',t:'varchar'},{n:'name',t:'nvarchar'},{n:'is_active',t:'bit'}]},
+      crm_enquiry_audit:       {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'lead_id',t:'varchar'},{n:'field_changed',t:'varchar'},{n:'old_value',t:'nvarchar'},{n:'new_value',t:'nvarchar'},{n:'changed_at',t:'datetime'}]},
+      crm_sync_metadata:       {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'source_system',t:'varchar'},{n:'last_sync_at',t:'datetime'},{n:'records_synced',t:'int'},{n:'status',t:'nvarchar'}]},
+      employee_master:         {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'email',t:'varchar'},{n:'department_id',t:'int',fk:true},{n:'role',t:'varchar'},{n:'is_active',t:'bit'}]},
+      employee_roles:          {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'employee_id',t:'int',fk:true},{n:'role_id',t:'int',fk:true},{n:'assigned_at',t:'datetime'}]},
+      departments:             {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'varchar'},{n:'head_id',t:'int'}]},
+      users:                   {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'email',t:'varchar'},{n:'role',t:'varchar'},{n:'is_active',t:'bit'},{n:'created_at',t:'datetime'}]},
+      users_backup:            {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'email',t:'varchar'}],type:'backup'},
+      users_backup_11112025:   {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'nvarchar'},{n:'email',t:'varchar'}],type:'backup'},
+      user_roles:              {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'user_id',t:'int',fk:true},{n:'role_id',t:'int',fk:true}]},
+      user_logs:               {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'user_id',t:'int',fk:true},{n:'action',t:'varchar'},{n:'created_at',t:'datetime'}]},
+      roles:                   {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'role_name',t:'varchar'},{n:'description',t:'nvarchar'}]},
+      workflows:               {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'name',t:'varchar'},{n:'trigger_event',t:'varchar'},{n:'steps_json',t:'nvarchar'},{n:'is_active',t:'bit'}]},
+      step_logs:               {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'workflow_id',t:'int',fk:true},{n:'step_name',t:'varchar'},{n:'status',t:'nvarchar'},{n:'user_id',t:'int',fk:true},{n:'executed_at',t:'datetime'}]},
+      airflow_dag_runs:        {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'dag_id',t:'varchar'},{n:'run_id',t:'varchar'},{n:'state',t:'varchar'},{n:'started_at',t:'datetime'},{n:'ended_at',t:'datetime'}]},
+      pipeline_metadata:       {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'pipeline_name',t:'varchar'},{n:'last_run_at',t:'datetime'},{n:'status',t:'nvarchar'},{n:'records_processed',t:'int'}]},
+      etl_checkpoints:         {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'pipeline_id',t:'int',fk:true},{n:'checkpoint_key',t:'varchar'},{n:'value',t:'nvarchar'},{n:'updated_at',t:'datetime'}]},
+      email_status:            {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'message_id',t:'varchar'},{n:'recipient',t:'varchar'},{n:'status',t:'nvarchar'},{n:'sent_at',t:'datetime'},{n:'opened_at',t:'datetime'}]},
+      SM_RFQ_Temp_Logs:        {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'rfq_id',t:'int'},{n:'supplier_id',t:'int'},{n:'log_data',t:'nvarchar'},{n:'logged_at',t:'datetime'}]},
+      SM_RFQ_Temp_Logs_history:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'rfq_id',t:'int'},{n:'log_data',t:'nvarchar'}],type:'temp'},
+      SM_RFQ_Temp_Logs_Staging:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'rfq_id',t:'int'},{n:'log_data',t:'nvarchar'}],type:'temp'},
+      SM_RFQ_Temp_Logs_temp_3103:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'rfq_id',t:'int'}],type:'temp'},
+      sm_rfq_temp_logs_test1:  {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'rfq_id',t:'int'}],type:'temp'},
+      mi_import_export_data:   {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'hs_code',t:'varchar'},{n:'product_name',t:'nvarchar'},{n:'country',t:'varchar'},{n:'year',t:'int'},{n:'quantity',t:'decimal'},{n:'value',t:'decimal'}]},
+      ticket_sync_jobs:        {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'ticket_id',t:'int',fk:true},{n:'target_system',t:'varchar'},{n:'status',t:'nvarchar'},{n:'synced_at',t:'datetime'}]},
+      bulk_upload_audit:       {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'upload_type',t:'varchar'},{n:'uploaded_by',t:'int'},{n:'records_count',t:'int'},{n:'status',t:'nvarchar'},{n:'uploaded_at',t:'datetime'}]},
+      assignee_update_log:     {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'ticket_id',t:'int',fk:true},{n:'old_assignee_id',t:'int'},{n:'new_assignee_id',t:'int'},{n:'changed_at',t:'datetime'}]},
+      JobControl:              {pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'job_name',t:'varchar'},{n:'status',t:'nvarchar'},{n:'last_run',t:'datetime'},{n:'next_run',t:'datetime'}]},
+      Gajanan_products_sourcing_mapped:{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_name',t:'nvarchar'},{n:'supplier_name',t:'nvarchar'}]},
+      'D.R.Coats_Resins_Products_mapped_':{pk:'id',cols:[{n:'id',t:'int',pk:true},{n:'product_name',t:'nvarchar'},{n:'supplier_name',t:'nvarchar'},{n:'cas_number',t:'varchar'}]}
+    }
+  },
+
+  /* ── nucleus_dev ── mssql-nucleus-dev ── 27 tables ── */
+  nucleus: {
+    label: 'nucleus_dev', color: '#6d28d9',
+    bg:'#f5f3ff', bd:'#c4b5fd', hdr:'#ede9fe',
+    key: ['projects','purchase_orders','customer_pos','project_quantities',
+          'project_scope','project_requirements','project_terms','project_suppliers',
+          'execution_fit','companies','users','employees','proposals','requests',
+          'ions_companies','ions_projects','ions_proposals','ions_users',
+          'zoho_leads','catalogue','chat','chat_messages',
+          'notifications','email_logs','audit_log','roles','permissions'],
+    fks: [
+      ['purchase_orders','project_id','projects','id'],
+      ['purchase_orders','supplier_id','companies','id'],
+      ['customer_pos','project_id','projects','id'],
+      ['customer_pos','po_id','purchase_orders','id'],
+      ['project_quantities','project_id','projects','id'],
+      ['project_scope','project_id','projects','id'],
+      ['project_requirements','project_id','projects','id'],
+      ['project_terms','project_id','projects','id'],
+      ['project_suppliers','project_id','projects','id'],
+      ['project_suppliers','supplier_id','companies','id'],
+      ['execution_fit','project_id','projects','id'],
+      ['projects','customer_id','companies','id'],
+      ['chat_messages','chat_id','chat','id'],
+      ['ions_projects','nucleus_project_id','projects','id'],
+      ['ions_companies','nucleus_company_id','companies','id']
+    ],
+    tables: {
+      projects:          {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'project_id',t:'varchar'},{n:'project_type',t:'nvarchar'},{n:'customer_id',t:'uuid',fk:true},{n:'status',t:'nvarchar'},{n:'product_name',t:'varchar'},{n:'cas_number',t:'varchar'},{n:'internal_poc_name',t:'varchar'},{n:'internal_poc_email',t:'varchar'},{n:'source_proposal_id',t:'uuid'},{n:'source_request_id',t:'uuid'},{n:'created_at',t:'datetime'},{n:'updated_at',t:'datetime'}]},
+      purchase_orders:   {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'po_id',t:'varchar'},{n:'project_id',t:'uuid',fk:true},{n:'supplier_id',t:'uuid',fk:true},{n:'release_date',t:'date'},{n:'eta_text',t:'varchar'},{n:'quantity',t:'decimal'},{n:'price_per_unit',t:'decimal'},{n:'order_value',t:'decimal'},{n:'payment_terms',t:'varchar'},{n:'status',t:'nvarchar'}]},
+      customer_pos:      {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'project_id',t:'uuid',fk:true},{n:'po_id',t:'uuid',fk:true},{n:'customer_po_number',t:'varchar'},{n:'po_release_date',t:'datetime'},{n:'quantity_override',t:'decimal'}]},
+      project_quantities:{pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'project_id',t:'uuid',fk:true},{n:'quantity',t:'decimal'},{n:'unit',t:'varchar'},{n:'eta_text',t:'varchar'},{n:'sort_order',t:'int'}]},
+      project_scope:     {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'project_id',t:'uuid',fk:true},{n:'proposal_code',t:'varchar'},{n:'appearance',t:'nvarchar'},{n:'grade',t:'varchar'},{n:'application',t:'nvarchar'},{n:'delivery_date',t:'date'},{n:'ros_file_url',t:'nvarchar'}]},
+      project_requirements:{pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'project_id',t:'uuid',fk:true},{n:'yield',t:'varchar'},{n:'impurity',t:'varchar'},{n:'assay',t:'varchar'},{n:'assay_tool',t:'varchar'}]},
+      project_terms:     {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'project_id',t:'uuid',fk:true},{n:'payment_method',t:'varchar'},{n:'payment_terms',t:'varchar'},{n:'payment_note',t:'nvarchar'},{n:'general_terms',t:'nvarchar'}]},
+      project_suppliers: {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'project_id',t:'uuid',fk:true},{n:'supplier_id',t:'uuid',fk:true},{n:'platform',t:'nvarchar'},{n:'platform_internal_id',t:'varchar'},{n:'is_active',t:'bit'},{n:'added_at',t:'datetime'}]},
+      execution_fit:     {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'project_id',t:'uuid',fk:true},{n:'facility_type',t:'varchar'},{n:'name_location',t:'nvarchar'},{n:'image_url',t:'nvarchar'},{n:'fit_score',t:'int'},{n:'highlights',t:'nvarchar'},{n:'sort_order',t:'int'}]},
+      companies:         {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'name',t:'nvarchar'},{n:'type',t:'nvarchar'},{n:'country',t:'varchar'},{n:'is_active',t:'bit'},{n:'scinode_company_id',t:'int'},{n:'created_at',t:'datetime'}]},
+      users:             {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'name',t:'nvarchar'},{n:'email',t:'varchar'},{n:'role',t:'varchar'},{n:'company_id',t:'uuid',fk:true},{n:'is_active',t:'bit'},{n:'created_at',t:'datetime'}]},
+      employees:         {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'name',t:'nvarchar'},{n:'email',t:'varchar'},{n:'department',t:'varchar'},{n:'role',t:'varchar'},{n:'is_active',t:'bit'}]},
+      proposals:         {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'request_id',t:'uuid',fk:true},{n:'partner_name',t:'nvarchar'},{n:'price_per_unit',t:'decimal'},{n:'currency',t:'varchar'},{n:'lead_time',t:'varchar'},{n:'status',t:'nvarchar'},{n:'published_at',t:'datetime'}]},
+      requests:          {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'request_type',t:'nvarchar'},{n:'customer_id',t:'uuid',fk:true},{n:'product_name',t:'varchar'},{n:'status',t:'nvarchar'},{n:'created_at',t:'datetime'}]},
+      ions_companies:    {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'ions_company_id',t:'int'},{n:'scinode_company_id',t:'int'},{n:'nucleus_company_id',t:'uuid',fk:true},{n:'synced_at',t:'datetime'}]},
+      ions_projects:     {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'ions_project_id',t:'int'},{n:'nucleus_project_id',t:'uuid',fk:true},{n:'platform_internal_id',t:'varchar'},{n:'synced_at',t:'datetime'}]},
+      ions_proposals:    {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'ions_proposal_id',t:'int'},{n:'nucleus_proposal_id',t:'uuid',fk:true},{n:'status',t:'nvarchar'},{n:'synced_at',t:'datetime'}]},
+      ions_users:        {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'ions_user_id',t:'int'},{n:'nucleus_user_id',t:'uuid',fk:true},{n:'synced_at',t:'datetime'}]},
+      zoho_leads:        {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'lead_id',t:'varchar'},{n:'email',t:'varchar'},{n:'company',t:'nvarchar'},{n:'phone',t:'varchar'},{n:'status',t:'nvarchar'},{n:'source',t:'varchar'},{n:'created_at',t:'datetime'}]},
+      catalogue:         {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'product_name',t:'varchar'},{n:'cas_number',t:'varchar'},{n:'category',t:'varchar'},{n:'supplier_id',t:'uuid',fk:true},{n:'price',t:'decimal'},{n:'currency',t:'varchar'},{n:'updated_at',t:'datetime'}]},
+      chat:              {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'project_id',t:'uuid',fk:true},{n:'participant_ids',t:'nvarchar'},{n:'created_at',t:'datetime'}]},
+      chat_messages:     {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'chat_id',t:'uuid',fk:true},{n:'sender_id',t:'uuid'},{n:'message',t:'nvarchar'},{n:'sent_at',t:'datetime'},{n:'is_read',t:'bit'}]},
+      notifications:     {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'user_id',t:'uuid',fk:true},{n:'type',t:'varchar'},{n:'message',t:'nvarchar'},{n:'is_read',t:'bit'},{n:'created_at',t:'datetime'}]},
+      email_logs:        {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'recipient',t:'varchar'},{n:'subject',t:'nvarchar'},{n:'template',t:'varchar'},{n:'sent_at',t:'datetime'},{n:'status',t:'nvarchar'}]},
+      audit_log:         {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'user_id',t:'uuid',fk:true},{n:'action',t:'varchar'},{n:'entity_type',t:'varchar'},{n:'entity_id',t:'uuid'},{n:'changes_json',t:'nvarchar'},{n:'created_at',t:'datetime'}]},
+      roles:             {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'role_name',t:'varchar'},{n:'permissions_json',t:'nvarchar'}]},
+      permissions:       {pk:'id',cols:[{n:'id',t:'uuid',pk:true},{n:'code',t:'varchar'},{n:'description',t:'nvarchar'},{n:'module',t:'varchar'}]}
+    }
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 2 — ENGINE (do not edit unless changing behaviour)
+   ═══════════════════════════════════════════════════════════════ */
+
+// ── constants ────────────────────────────────────────────────
+var EW=180, CH=14, HH=30, MC=5, GAP=16, CP=50;
+// ── state ────────────────────────────────────────────────────
+var mode='key', activeDB='all', searchQ='', smode='table';
+var sel=null, LAYOUT={}, BOUNDS={}, maxX=0, maxY=0;
+var scale=.3, px=0, py=0, dragging=false, moved=false, mx0=0, my0=0;
+
+// ── helpers ──────────────────────────────────────────────────
+function eh(tbl){ return HH+Math.min(tbl.cols.length,MC)*CH+6+(tbl.cols.length>MC?12:0); }
+
+function ttype(name){
+  var n=name.toLowerCase();
+  if(/_backup|backup_\d/.test(n)) return 'backup';
+  if(/_temp|_staging|test\d*$/.test(n)) return 'temp';
+  if(/_arch/.test(n)) return 'archive';
+  return 'live';
+}
+
+function visibleTables(db){
+  var all=Object.keys(SCHEMA_DATA[db].tables);
+  if(mode==='key'){
+    var k=SCHEMA_DATA[db].key||[];
+    return all.filter(function(n){return k.indexOf(n)>=0;});
+  }
+  return all;
+}
+
+// ── layout ───────────────────────────────────────────────────
+function layoutDB(db, sx, sy, cols){
+  var tbls=visibleTables(db), out={}, c=0, x=sx, y=sy, rh=0;
+  tbls.forEach(function(name){
+    var tbl=SCHEMA_DATA[db].tables[name]; if(!tbl) return;
+    var h=eh(tbl);
+    out[name]={x:x,y:y,w:EW,h:h,db:db};
+    rh=Math.max(rh,h); c++;
+    x+=EW+GAP;
+    if(c>=cols){c=0;x=sx;y+=rh+GAP;rh=0;}
+  });
+  if(rh>0) y+=rh;
+  var ps=Object.values(out);
+  if(!ps.length) return {pos:out,bounds:{x:sx,y:sy,w:0,h:0}};
+  var bx=Math.min.apply(null,ps.map(function(p){return p.x;}));
+  var by=Math.min.apply(null,ps.map(function(p){return p.y;}));
+  var bX=Math.max.apply(null,ps.map(function(p){return p.x+p.w;}));
+  var bY=Math.max.apply(null,ps.map(function(p){return p.y+p.h;}));
+  return {pos:out,bounds:{x:bx,y:by,w:bX-bx,h:bY-by}};
+}
+
+function recompute(){
+  var iR=layoutDB('ions',40,80,5);
+  var sY=80+iR.bounds.h+CP+55;
+  var sR=layoutDB('sourcing',40,sY,8);
+  var c2=Math.max(iR.bounds.x+iR.bounds.w,sR.bounds.x+sR.bounds.w)+110;
+  var scR=layoutDB('scinode',c2,80,12);
+  var nY=80+scR.bounds.h+CP+55;
+  var nR=layoutDB('nucleus',c2,nY,6);
+  for(var k in LAYOUT) delete LAYOUT[k];
+  [iR,sR,scR,nR].forEach(function(r){Object.assign(LAYOUT,r.pos);});
+  BOUNDS={ions:iR.bounds,sourcing:sR.bounds,scinode:scR.bounds,nucleus:nR.bounds};
+  maxX=0;maxY=0;
+  Object.values(LAYOUT).forEach(function(p){maxX=Math.max(maxX,p.x+p.w+60);maxY=Math.max(maxY,p.y+p.h+60);});
+}
+
+// ── build ────────────────────────────────────────────────────
+function buildAll(){
+  // SVG
+  var svg=document.getElementById('esvg');
+  svg.innerHTML='';
+  svg.setAttribute('width',maxX);svg.setAttribute('height',maxY);
+  var defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+  svg.appendChild(defs);
+
+  // cluster backgrounds
+  Object.entries(BOUNDS).forEach(function(e){
+    var db=e[0],b=e[1]; if(!b.w) return;
+    var D=SCHEMA_DATA[db]; var pad=CP-8;
+    var shadow=mkRect(b.x-pad+3,b.y-pad+3,b.w+pad*2,b.h+pad*2,12,'rgba(0,0,0,.04)','none');
+    svg.appendChild(shadow);
+    var bg=mkRect(b.x-pad,b.y-pad,b.w+pad*2,b.h+pad*2,10,D.bg,D.bd);
+    bg.setAttribute('stroke-width','1.5');
+    svg.appendChild(bg);
+    var lbl=mkText(b.x-pad+12,b.y-pad+22,D.label,'Syne,sans-serif',14,700,D.color,1);
+    svg.appendChild(lbl);
+    var vis=visibleTables(db).length;
+    var tot=Object.keys(D.tables).length;
+    var cnt=mkText(b.x-pad+12,b.y-pad+37,(mode==='key'?vis+' key tables (of '+tot+' total)':vis+' tables')+' \u00b7 '+D.fks.length+' FKs','JetBrains Mono,monospace',9,400,D.color,.55);
+    svg.appendChild(cnt);
+  });
+
+  // FK lines
+  var mc={};
+  function marker(col,dash){
+    var id='mk'+col.replace('#','')+(dash?'d':'s');
+    if(!mc[id]){mc[id]=1;
+      var m=document.createElementNS('http://www.w3.org/2000/svg','marker');
+      m.setAttribute('id',id);m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');
+      m.setAttribute('refX','6');m.setAttribute('refY','3.5');m.setAttribute('orient','auto');
+      var poly=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+      poly.setAttribute('points','0 1,6 3.5,0 6');poly.setAttribute('fill',col);poly.setAttribute('opacity','.8');
+      m.appendChild(poly);defs.appendChild(m);
+    }
+    return id;
+  }
+
+  Object.keys(SCHEMA_DATA).forEach(function(db){
+    SCHEMA_DATA[db].fks.forEach(function(fk){
+      var f=LAYOUT[fk[0]],t=LAYOUT[fk[2]]; if(!f||!t||f===t) return;
+      var cross=f.db!==t.db;
+      var col=cross?'#6366f1':SCHEMA_DATA[f.db].color;
+      var op=cross?.25:.35;
+      var fx=(f.x+f.w/2<t.x+t.w/2)?f.x+f.w:f.x;
+      var tx=(f.x+f.w/2<t.x+t.w/2)?t.x:t.x+t.w;
+      var fy=f.y+f.h/2,ty=t.y+t.h/2;
+      var dx=Math.abs(tx-fx);
+      var cp1x=fx+(fx<tx?dx*.45:-dx*.45),cp2x=tx+(tx<fx?dx*.45:-dx*.45);
+      var path=document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d','M '+fx+' '+fy+' C '+cp1x+' '+fy+' '+cp2x+' '+ty+' '+tx+' '+ty);
+      path.setAttribute('fill','none');path.setAttribute('stroke',col);
+      path.setAttribute('stroke-width',cross?'1.5':'1');path.setAttribute('stroke-opacity',op);
+      if(cross)path.setAttribute('stroke-dasharray','6,4');
+      path.setAttribute('marker-end','url(#'+marker(col,cross)+')');
+      path.dataset.from=fk[0];path.dataset.to=fk[2];
+      path.classList.add('fkl');
+      svg.appendChild(path);
+    });
+  });
+
+  // entity boxes
+  var stage=document.getElementById('stage');
+  stage.querySelectorAll('.ent').forEach(function(e){e.remove();});
+  Object.keys(LAYOUT).forEach(function(name){
+    var pos=LAYOUT[name],db=pos.db;
+    var tbl=SCHEMA_DATA[db].tables[name]; if(!tbl) return;
+    var D=SCHEMA_DATA[db];
+    var tt=tbl.type||ttype(name);
+    var hbg=tt==='backup'?'#fef2f2':tt==='temp'?'#fff7ed':tt==='archive'?'#f9fafb':D.hdr;
+    var hc=tt==='live'?D.color:(tt==='backup'?'#b91c1c':tt==='temp'?'#c2410c':'#6b7280');
+
+    var el=document.createElement('div');
+    el.className='ent';
+    el.id='ent-'+name.replace(/[^a-zA-Z0-9]/g,'_');
+    el.dataset.tbl=name;el.dataset.db=db;
+    el.style.cssText='left:'+pos.x+'px;top:'+pos.y+'px;width:'+pos.w+'px;border-color:'+D.bd;
+
+    // header
+    var hdr=document.createElement('div');
+    hdr.className='eh';
+    hdr.style.cssText='color:'+hc+';background:'+hbg;
+    var shortN=name.startsWith('sci.')?name.slice(4):name;
+    var hn=document.createTextNode(shortN); hdr.appendChild(hn);
+    var schema=tbl.schema||'dbo';
+    if(schema!=='dbo'){var sch=document.createElement('span');sch.className='esch';sch.textContent=schema;hdr.appendChild(sch);}
+    if(tt!=='live'){
+      var tag=document.createElement('span');tag.className='etag';
+      tag.style.cssText='background:'+(tt==='backup'?'#fee2e2;color:#991b1b':tt==='temp'?'#ffedd5;color:#9a3412':'#f3f4f6;color:#4b5563');
+      tag.textContent=tt;hdr.appendChild(tag);
+    }
+    el.appendChild(hdr);
+
+    // columns
+    var body=document.createElement('div');body.className='eb';
+    tbl.cols.slice(0,MC).forEach(function(c){
+      var row=document.createElement('div');
+      row.className='ec'+(c.pk?' pk':c.fk?' fk':'');
+      row.dataset.col=c.n;
+      var bdg=document.createElement('span');
+      bdg.className='ebdg'+(c.pk?' pk':c.fk?' fk':'');
+      bdg.textContent=c.pk?'PK':c.fk?'FK':'';
+      var cn=document.createElement('span');cn.textContent=c.n;
+      row.appendChild(bdg);row.appendChild(cn);
+      body.appendChild(row);
+    });
+    if(tbl.cols.length>MC){var m=document.createElement('div');m.className='emore';m.textContent='+'+(tbl.cols.length-MC)+' more';body.appendChild(m);}
+    el.appendChild(body);
+
+    el.addEventListener('click',function(){if(!moved)clickEnt(name);});
+    el.addEventListener('dblclick',function(e){e.stopPropagation();zoomTo(name);});
+    stage.appendChild(el);
+  });
+
+  updateStats();
+  applyFilter();
+  tf();
+  mmDraw();
+}
+
+function mkRect(x,y,w,h,r,fill,stroke){
+  var el=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  el.setAttribute('x',x);el.setAttribute('y',y);el.setAttribute('width',w);el.setAttribute('height',h);
+  el.setAttribute('rx',r);el.setAttribute('fill',fill);el.setAttribute('stroke',stroke);
+  return el;
+}
+function mkText(x,y,text,ff,fs,fw,fill,op){
+  var el=document.createElementNS('http://www.w3.org/2000/svg','text');
+  el.setAttribute('x',x);el.setAttribute('y',y);el.setAttribute('fill',fill);
+  el.setAttribute('font-family',ff);el.setAttribute('font-size',fs);el.setAttribute('font-weight',fw);
+  el.setAttribute('opacity',op);el.textContent=text;return el;
+}
+
+// ── selection ────────────────────────────────────────────────
+function clickEnt(name){
+  if(sel===name){clearSel();return;}
+  sel=name;
+  var pos=LAYOUT[name],db=pos.db;
+  var connected=new Set([name]);
+  document.querySelectorAll('.fkl').forEach(function(l){
+    if(l.dataset.from===name||l.dataset.to===name){
+      l.style.strokeOpacity='1';l.style.strokeWidth='2.5';
+      connected.add(l.dataset.from);connected.add(l.dataset.to);
+    }else{l.style.strokeOpacity='.04';}
+  });
+  document.querySelectorAll('.ent').forEach(function(el){
+    el.classList.remove('sel','conn','fade');
+    var t=el.dataset.tbl;
+    if(t===name)el.classList.add('sel');
+    else if(connected.has(t))el.classList.add('conn');
+    else el.classList.add('fade');
+  });
+  showPanel(name,db,SCHEMA_DATA[db].tables[name]);
+}
+
+function clearSel(){
+  sel=null;
+  document.querySelectorAll('.ent').forEach(function(el){el.classList.remove('sel','conn','fade');});
+  document.querySelectorAll('.fkl').forEach(function(l){l.style.strokeOpacity='';l.style.strokeWidth='';});
+  document.getElementById('panel').classList.remove('open');
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')clearSel();});
+
+// ── info panel ───────────────────────────────────────────────
+function showPanel(name,db,tbl){
+  var D=SCHEMA_DATA[db];
+  document.getElementById('pname').textContent=name;
+  document.getElementById('pname').style.color=D.color;
+  document.getElementById('pmeta').textContent=
+    D.label+' \u00b7 '+(tbl.schema||'dbo')+' schema \u00b7 '+tbl.cols.length+' columns \u00b7 PK: '+(tbl.pk||'\u2014');
+
+  var body=document.getElementById('pbody');body.innerHTML='';
+
+  var fksOut=D.fks.filter(function(f){return f[0]===name;});
+  var fksIn =D.fks.filter(function(f){return f[2]===name;});
+
+  function refSection(title,col,arr,colIdx){
+    if(!arr.length)return;
+    var s=document.createElement('div');s.className='psec';s.style.color=col;s.textContent=title;body.appendChild(s);
+    var w=document.createElement('div');w.style.padding='0 14px 8px';
+    arr.forEach(function(f){
+      var a=document.createElement('span');a.className='plink';a.textContent=f[colIdx];a.style.color='#2563eb';
+      a.setAttribute('data-t',f[colIdx]);
+      a.addEventListener('click',function(){clickEnt(this.getAttribute('data-t'));});
+      w.appendChild(a);
+    });
+    body.appendChild(w);
+  }
+  refSection('\u2197 References',D.color,fksOut,2);
+  refSection('\u2199 Referenced by',D.color,fksIn,0);
+
+  var cs=document.createElement('div');cs.className='psec';cs.textContent='All Columns ('+tbl.cols.length+')';body.appendChild(cs);
+  var cl=document.createElement('div');cl.className='pcols';
+  tbl.cols.forEach(function(c){
+    var row=document.createElement('div');row.className='pcol';
+    var b=document.createElement('span');
+    b.style.cssText='min-width:16px;font-size:7.5px;font-weight:700;text-align:center;'+(c.pk?'color:#1d4ed8':c.fk?'color:#6d28d9':'color:transparent');
+    b.textContent=c.pk?'PK':c.fk?'FK':'\u00b7';
+    var cn=document.createElement('span');
+    cn.style.cssText=(c.pk?'color:#1d4ed8;font-weight:600':c.fk?'color:#6d28d9':'color:#374151');
+    cn.textContent=c.n;
+    var ct=document.createElement('span');ct.style.cssText='margin-left:auto;color:#94a3b8;font-size:9px';ct.textContent=c.t;
+    row.appendChild(b);row.appendChild(cn);row.appendChild(ct);
+    cl.appendChild(row);
+  });
+  body.appendChild(cl);
+
+  var zb=document.createElement('button');zb.className='pzbtn';zb.textContent='\u2197 Zoom to table';
+  zb.setAttribute('data-t',name);zb.addEventListener('click',function(){zoomTo(this.getAttribute('data-t'));});
+  body.appendChild(zb);
+  document.getElementById('panel').classList.add('open');
+}
+
+// ── filter ───────────────────────────────────────────────────
+function applyFilter(){
+  document.querySelectorAll('.ent').forEach(function(el){
+    var ok=activeDB==='all'||el.dataset.db===activeDB;
+    el.style.display=ok?'block':'none';
+    el.classList.remove('sel','conn','fade','shi','sdim');
+  });
+  document.querySelectorAll('.fkl').forEach(function(l){
+    var f=document.getElementById('ent-'+l.dataset.from.replace(/[^a-zA-Z0-9]/g,'_'));
+    var t=document.getElementById('ent-'+l.dataset.to.replace(/[^a-zA-Z0-9]/g,'_'));
+    l.style.display=(f&&t&&f.style.display!=='none'&&t.style.display!=='none')?'':'none';
+  });
+}
+
+// ── search ───────────────────────────────────────────────────
+function setSM(m){
+  smode=m;
+  ['table','column','both'].forEach(function(x){document.getElementById('sm-'+x).classList.toggle('on',x===m);});
+  doSearch(document.getElementById('srch').value);
+}
+
+function doSearch(val){
+  var q=val.toLowerCase().trim();searchQ=q;
+  var panel=document.getElementById('srp'),body=document.getElementById('srpb'),hdr=document.getElementById('srph');
+  if(!q){panel.classList.remove('open');applyFilter();return;}
+  panel.classList.add('open');
+  var results=[];
+  Object.keys(SCHEMA_DATA).forEach(function(db){
+    Object.keys(SCHEMA_DATA[db].tables).forEach(function(name){
+      if(!LAYOUT[name])return;
+      var tbl=SCHEMA_DATA[db].tables[name];
+      var tm=(smode==='table'||smode==='both')&&name.toLowerCase().includes(q);
+      var cm=[];
+      if(smode==='column'||smode==='both')cm=tbl.cols.filter(function(c){return c.n.toLowerCase().includes(q);});
+      if(tm||cm.length)results.push({name:name,db:db,tbl:tbl,cm:cm});
+    });
+  });
+  var ms=new Set(results.map(function(r){return r.name;}));
+  document.querySelectorAll('.ent').forEach(function(el){
+    el.classList.remove('shi','sdim');
+    if(!ms.size)return;
+    if(ms.has(el.dataset.tbl))el.classList.add('shi');else el.classList.add('sdim');
+  });
+  document.querySelectorAll('.fkl').forEach(function(l){l.style.display=ms.has(l.dataset.from)&&ms.has(l.dataset.to)?'':'none';});
+  document.querySelectorAll('.ent.shi .ec').forEach(function(r){r.classList.toggle('cm',!!(r.dataset.col&&r.dataset.col.toLowerCase().includes(q)));});
+  hdr.textContent=results.length+' result'+(results.length!==1?'s':'');
+  body.innerHTML='';
+  if(!results.length){body.innerHTML='<div class="srpe">No match for &ldquo;'+q+'&rdquo;</div>';return;}
+  results.slice(0,60).forEach(function(r){
+    var D=SCHEMA_DATA[r.db];
+    var item=document.createElement('div');item.className='sri';
+    var top=document.createElement('div');
+    var n=document.createElement('span');n.className='srin';n.textContent=r.name;
+    var db=document.createElement('span');db.className='srdb';
+    db.style.cssText='background:'+D.bg+';color:'+D.color+';border:1px solid '+D.bd;db.textContent=r.db;
+    top.appendChild(n);top.appendChild(db);item.appendChild(top);
+    if(r.cm.length){var c=document.createElement('div');c.className='srcm';c.innerHTML='Cols: '+r.cm.map(function(col){return '<span class="srcmhi">'+col.n+'</span>';}).join(', ');item.appendChild(c);}
+    item.addEventListener('click',function(){zoomTo(r.name);});
+    body.appendChild(item);
+  });
+  if(results.length>60){var m=document.createElement('div');m.className='srpe';m.textContent='...and '+(results.length-60)+' more';body.appendChild(m);}
+}
+
+// ── stats ────────────────────────────────────────────────────
+function updateStats(){
+  var shown=Object.keys(LAYOUT).length;
+  var total=Object.keys(SCHEMA_DATA).reduce(function(a,db){return a+Object.keys(SCHEMA_DATA[db].tables).length;},0);
+  var fks=Object.keys(SCHEMA_DATA).reduce(function(a,db){return a+SCHEMA_DATA[db].fks.length;},0);
+  document.getElementById('stat').textContent=
+    (mode==='key'?shown+' shown / '+total+' total':shown+' tables')+' \u00b7 '+fks+' FKs';
+}
+
+// ── mode toggle ───────────────────────────────────────────────
+function setMode(m){
+  mode=m;
+  var tk=document.getElementById('tbk'),ta=document.getElementById('tba');
+  tk.style.cssText='padding:4px 11px;font-size:11px;font-weight:600;cursor:pointer;border:none;outline:none;font-family:Inter,sans-serif;background:'+(m==='key'?'#2563eb':'#f8fafc')+';color:'+(m==='key'?'#fff':'#64748b');
+  ta.style.cssText=tk.style.cssText.replace(m==='key'?'#2563eb':'#f8fafc',m==='all'?'#2563eb':'#f8fafc').replace(m==='key'?'#fff':'#64748b',m==='all'?'#fff':'#64748b')+'border-left:1px solid #e2e8f0';
+  clearSel();recompute();buildAll();fitAll();
+}
+
+// ── DB tabs ───────────────────────────────────────────────────
+function buildTabs(){
+  var wrap=document.getElementById('tabs');wrap.innerHTML='';
+  var dbs=[{id:'all',label:'All DBs',color:'#2563eb',bg:'#eff6ff',bd:'#bfdbfe'}];
+  Object.keys(SCHEMA_DATA).forEach(function(db){
+    var D=SCHEMA_DATA[db];dbs.push({id:db,label:D.label,color:D.color,bg:D.bg,bd:D.bd});
+  });
+  dbs.forEach(function(d){
+    var t=document.createElement('div');t.className='tab';t.dataset.db=d.id;
+    t.textContent=d.label;
+    if(d.id==='all'){t.classList.add('on');t.style.background=d.bg;t.style.borderColor=d.bd;t.style.color=d.color;}
+    t.addEventListener('click',function(){
+      activeDB=d.id;
+      document.querySelectorAll('.tab').forEach(function(x){
+        x.classList.remove('on');x.style.background='';x.style.borderColor='transparent';x.style.color='';
+      });
+      t.classList.add('on');t.style.background=d.bg;t.style.borderColor=d.bd;t.style.color=d.color;
+      document.getElementById('srch').value='';document.getElementById('srp').classList.remove('open');
+      clearSel();applyFilter();
+      if(d.id!=='all')zoomToCluster(d.id);else fitAll();
+    });
+    wrap.appendChild(t);
+  });
+}
+
+// ── pan/zoom ──────────────────────────────────────────────────
+var cv=document.getElementById('cv');
+cv.addEventListener('mousedown',function(e){if(e.button!==0)return;dragging=true;moved=false;mx0=e.clientX;my0=e.clientY;cv.classList.add('drag');e.preventDefault();});
+window.addEventListener('mousemove',function(e){if(!dragging)return;var dx=e.clientX-mx0,dy=e.clientY-my0;if(Math.abs(dx)+Math.abs(dy)>3)moved=true;px+=dx;py+=dy;mx0=e.clientX;my0=e.clientY;tf();mmDraw();});
+window.addEventListener('mouseup',function(){dragging=false;cv.classList.remove('drag');});
+cv.addEventListener('wheel',function(e){
+  e.preventDefault();
+  var d=e.deltaY;if(e.deltaMode===1)d*=30;if(e.deltaMode===2)d*=300;
+  var f=Math.pow(0.999,d);
+  var r=cv.getBoundingClientRect();
+  var mx2=e.clientX-r.left,my2=e.clientY-r.top;
+  var ns=Math.max(0.06,Math.min(5,scale*f));
+  var ratio=ns/scale;
+  px=mx2-(mx2-px)*ratio;py=my2-(my2-py)*ratio;scale=ns;
+  tf();mmDraw();
+},{passive:false});
+
+function tf(){document.getElementById('stage').style.transform='translate('+px+'px,'+py+'px) scale('+scale+')';}
+
+function zoomTo(name){
+  var pos=LAYOUT[name];if(!pos)return;
+  var vw=cv.clientWidth,vh=cv.clientHeight;
+  scale=1.6;px=vw/2-(pos.x+pos.w/2)*scale;py=vh/2-(pos.y+pos.h/2)*scale;tf();
+}
+function zoomToCluster(db){
+  var b=BOUNDS[db];if(!b||!b.w)return;
+  var vw=cv.clientWidth,vh=cv.clientHeight;
+  var pad=CP;
+  scale=Math.min(vw/(b.w+pad*2)*.9,vh/(b.h+pad*2)*.9,2.5);
+  px=vw/2-(b.x+b.w/2)*scale;py=vh/2-(b.y+b.h/2)*scale;tf();
+}
+function fitAll(){
+  var vw=cv.clientWidth,vh=cv.clientHeight;
+  scale=Math.min(vw/maxX*.9,vh/maxY*.9,1);
+  px=(vw-maxX*scale)/2;py=10;tf();mmDraw();
+}
+
+// ── minimap ───────────────────────────────────────────────────
+function mmDraw(){
+  var c=document.getElementById('mmc'),ctx=c.getContext('2d');
+  var W=c.width,H=c.height,sx=W/maxX,sy=H/maxY;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#f1f5f9';ctx.fillRect(0,0,W,H);
+  Object.entries(BOUNDS).forEach(function(e){
+    var db=e[0],b=e[1];if(!b.w)return;var D=SCHEMA_DATA[db];var pad=CP-8;
+    ctx.fillStyle=D.bg;ctx.strokeStyle=D.bd;ctx.lineWidth=.5;
+    ctx.fillRect((b.x-pad)*sx,(b.y-pad)*sy,(b.w+pad*2)*sx,(b.h+pad*2)*sy);
+    ctx.strokeRect((b.x-pad)*sx,(b.y-pad)*sy,(b.w+pad*2)*sx,(b.h+pad*2)*sy);
+  });
+  Object.entries(LAYOUT).forEach(function(e){
+    var pos=e[1];ctx.fillStyle=SCHEMA_DATA[pos.db].color+'99';
+    ctx.fillRect(pos.x*sx,pos.y*sy,Math.max(2,pos.w*sx),Math.max(1.5,pos.h*sy));
+  });
+  var vw=cv.clientWidth,vh=cv.clientHeight;
+  var vx=(-px/scale)*sx,vy=(-py/scale)*sy,vw2=(vw/scale)*sx,vh2=(vh/scale)*sy;
+  var vr=document.getElementById('mmv');
+  vr.style.left=Math.max(0,vx)+'px';vr.style.top=Math.max(0,vy)+'px';
+  vr.style.width=Math.min(W,vw2)+'px';vr.style.height=Math.min(H,vh2)+'px';
+}
+
+// ── refresh ───────────────────────────────────────────────────
+function refresh(){
+  /* HOW TO REFRESH:
+     1. Run the schema SQL against each MCP server in Claude chat:
+        mssql-ions-dev:read_data    → SELECT t.name, c.name, tp.name, CASE WHEN pk... FROM sys.tables ...
+        mssql-scinode-dev:read_data → same query
+        mssql-sourcing-dev:read_data → same query
+        mssql-nucleus-dev:read_data  → same query
+     2. Ask Claude to update SCHEMA_DATA above with the fresh results
+     3. Click this button — the ERD redraws from the updated data in SCHEMA_DATA */
+  var btn=document.getElementById('rfsh');btn.classList.add('spinning');
+  setTimeout(function(){
+    clearSel();recompute();buildAll();fitAll();
+    btn.classList.remove('spinning');
+  },400);
+}
+
+// ── init ──────────────────────────────────────────────────────
+buildTabs();
+setMode('key'); // this calls recompute + buildAll + fitAll internally
+</script>
+</body>
+</html>
