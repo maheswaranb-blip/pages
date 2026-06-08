@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRP — Atoms Manufacturing Stages CRUD</title>
+<style>
+  :root {
+    --bg: #f9f9f8;
+    --surface: #ffffff;
+    --surface2: #f3f2ef;
+    --border: #e4e3df;
+    --border-mid: #d0cfc9;
+    --text: #1a1a18;
+    --text2: #5a5955;
+    --text3: #9a9893;
+    --green: #1a7a4a;
+    --green-bg: #e8f5ee;
+    --blue: #1a5fa8;
+    --blue-bg: #e8f0fb;
+    --amber: #9a6200;
+    --amber-bg: #fef3dc;
+    --red: #a02020;
+    --red-bg: #fdeaea;
+    --purple: #5a3ea8;
+    --purple-bg: #f0ecfd;
+    --teal: #0f6e56;
+    --teal-bg: #e1f5ee;
+    --mono: 'Courier New', monospace;
+    --sans: -apple-system, 'Segoe UI', system-ui, sans-serif;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ─── TOP BAR ─── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    height: 52px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-logo {
+    font-size: 15px;
+    font-weight: 700;
+    color: #6c47d9;
+    letter-spacing: -0.5px;
+  }
+  .topbar-sep { color: var(--border-mid); font-size: 18px; }
+  .topbar-title { font-size: 14px; color: var(--text2); }
+  .topbar-badges { margin-left: auto; display: flex; gap: 8px; }
+
+  /* ─── LAYOUT ─── */
+  .page { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  /* ─── BADGES ─── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 600; padding: 3px 9px;
+    border-radius: 20px; letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .badge-green { background: var(--green-bg); color: var(--green); }
+  .badge-amber { background: var(--amber-bg); color: var(--amber); }
+  .badge-blue  { background: var(--blue-bg);  color: var(--blue); }
+  .badge-purple{ background: var(--purple-bg);color: var(--purple); }
+  .badge-gray  { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+
+  /* ─── HERO ─── */
+  .hero {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.25rem;
+  }
+  .hero-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .hero h1 {
+    font-size: 24px; font-weight: 700; color: var(--text);
+    letter-spacing: -0.5px; margin-bottom: 8px;
+  }
+  .hero-desc { font-size: 14px; color: var(--text2); margin-bottom: 1rem; line-height: 1.7; }
+  .hero-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px; margin-bottom: 1rem;
+  }
+  .hero-pill {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 8px 12px;
+    font-size: 12px;
+  }
+  .hero-pill-label { color: var(--text3); font-size: 11px; margin-bottom: 2px; }
+  .hero-pill-val { color: var(--text); font-weight: 600; }
+  .url-box {
+    background: #f0f4ff; border: 1px solid #c8d8f8;
+    border-radius: var(--radius); padding: 10px 14px;
+    font-family: var(--mono); font-size: 12px; color: var(--blue);
+    word-break: break-all;
+  }
+  .url-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; font-family: var(--sans); }
+
+  /* ─── SECTION WRAPPER ─── */
+  .section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); margin-bottom: 1.25rem;
+    overflow: hidden;
+  }
+  .section-head {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-head h2 { font-size: 15px; font-weight: 700; color: var(--text); }
+  .section-body { padding: 1.25rem 1.5rem; }
+
+  /* ─── STAGE CARDS ─── */
+  .stage-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  }
+  @media (max-width: 700px) { .stage-grid { grid-template-columns: 1fr 1fr; } }
+  .stage-card {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1rem; position: relative; overflow: hidden;
+  }
+  .stage-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .stage-card:nth-child(1)::before { background: #6c47d9; }
+  .stage-card:nth-child(2)::before { background: #1a7a4a; }
+  .stage-card:nth-child(3)::before { background: #1a5fa8; }
+  .stage-card:nth-child(4)::before { background: #9a6200; }
+  .stage-num {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--text3); margin-bottom: 4px;
+  }
+  .stage-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+  .stage-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+  /* ─── LIVE DATA BLOCK ─── */
+  .live-block {
+    background: #fafdf9; border: 1px solid #c8e8d4;
+    border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1rem;
+  }
+  .live-block-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--green); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green); display: inline-block;
+  }
+
+  /* ─── INLINE TABLE ─── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th {
+    text-align: left; padding: 7px 10px;
+    font-size: 11px; font-weight: 600; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    background: var(--surface2); border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: 8px 10px; color: var(--text2);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table td.mono { font-family: var(--mono); font-size: 12px; color: var(--text); }
+  .data-table td.primary { color: var(--text); font-weight: 600; }
+
+  /* ─── METHOD BADGES ─── */
+  .method {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    padding: 2px 6px; border-radius: 4px; font-family: var(--mono);
+    letter-spacing: 0.03em;
+  }
+  .get  { background: #e8f0fb; color: #1a5fa8; }
+  .post { background: #e8f5ee; color: #1a7a4a; }
+  .put  { background: #fef3dc; color: #9a6200; }
+  .del  { background: #fdeaea; color: #a02020; }
+
+  /* ─── API ENDPOINT ROWS ─── */
+  .api-group { margin-bottom: 1.25rem; }
+  .api-group:last-child { margin-bottom: 0; }
+  .api-group-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--text3); margin-bottom: 8px;
+    padding-bottom: 6px; border-bottom: 1px solid var(--border);
+  }
+  .api-row { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
+  .api-row:last-child { margin-bottom: 0; }
+  .api-sig { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .api-endpoint { font-family: var(--mono); font-size: 12px; color: var(--text); }
+  .api-note { font-size: 12px; color: var(--text3); }
+
+  /* ─── PERMISSION GRID ─── */
+  .perm-grid { display: flex; flex-direction: column; gap: 0; }
+  .perm-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .perm-row:last-child { border-bottom: none; }
+  .perm-label { color: var(--text2); }
+  .perm-yes { color: var(--green); font-weight: 700; }
+  .perm-no  { color: var(--red);   font-weight: 700; }
+  .perm-readonly {
+    font-size: 11px; background: var(--surface2); color: var(--text3);
+    padding: 2px 7px; border-radius: 10px;
+  }
+
+  /* ─── DECISION TABLE ─── */
+  .decision-row {
+    display: grid; grid-template-columns: 220px 1fr;
+    gap: 1rem; padding: 9px 0; border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .decision-row:last-child { border-bottom: none; }
+  .decision-key { color: var(--text); font-weight: 600; }
+  .decision-val { color: var(--text2); line-height: 1.5; }
+
+  /* ─── AUTO-CREATE BLOCKS ─── */
+  .auto-card {
+    background: var(--surface2); border-radius: var(--radius);
+    padding: 1rem 1.25rem; margin-bottom: 10px;
+  }
+  .auto-card:last-child { margin-bottom: 0; }
+  .auto-card-title {
+    font-family: var(--mono); font-size: 12px; font-weight: 700;
+    color: var(--purple); margin-bottom: 8px;
+  }
+  .auto-steps {
+    list-style: decimal; padding-left: 1.2rem;
+    font-size: 12px; color: var(--text2); line-height: 2;
+  }
+
+  /* ─── FILES SECTION ─── */
+  .file-row {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .file-row:last-child { border-bottom: none; }
+  .file-path { font-family: var(--mono); font-size: 12px; color: var(--blue); font-weight: 600; }
+  .file-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+  /* ─── ACCORDION (stages expanded view) ─── */
+  .stage-expanded {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    margin-bottom: 10px; overflow: hidden;
+  }
+  .stage-expanded-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .stage-expanded-head-left { display: flex; align-items: center; gap: 8px; }
+  .stage-label { font-size: 13px; font-weight: 700; color: var(--text); }
+  .stage-expanded-body { padding: 1rem; }
+
+  /* ─── FINALIZED ROW ─── */
+  .finalized-name { color: var(--green); font-weight: 600; }
+  .finalized-badge {
+    font-size: 10px; background: var(--green-bg); color: var(--green);
+    padding: 2px 6px; border-radius: 10px; font-weight: 700; margin-left: 4px;
+  }
+
+  /* ─── UI note ─── */
+  .ui-note {
+    font-size: 11px; color: var(--text3);
+    background: var(--surface2); border-radius: var(--radius);
+    padding: 6px 10px; margin-top: 8px; display: flex; gap: 6px; align-items: flex-start;
+  }
+
+  /* ─── DB TABLE note col ─── */
+  td.stage-col { white-space: nowrap; }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    text-align: center; font-size: 12px; color: var(--text3);
+    margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border);
+  }
+  .footer code { font-family: var(--mono); background: var(--surface2); padding: 1px 5px; border-radius: 4px; }
+
+  /* ─── PRINT ─── */
+  @media print {
+    .topbar { position: static; }
+    body { background: white; }
+    .section, .hero { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<div class="topbar">
+  <span class="topbar-logo">&#x2659; Nucleus Hub</span>
+  <span class="topbar-sep">/</span>
+  <span class="topbar-title">Project Management → Atoms → Manufacturing Stages</span>
+  <div class="topbar-badges">
+    <span class="badge badge-green">✓ Implementation Complete</span>
+    <span class="badge badge-amber">⏳ Pending Review &amp; Merge</span>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ═══════════════════ HERO ═══════════════════ -->
+  <div class="hero">
+    <div class="hero-meta">
+      <span class="badge badge-purple">feature/atoms-project-management-crud</span>
+      <span class="badge badge-gray">Nucleus-hub · FastAPI · port 8002</span>
+      <span class="badge badge-gray">sourcing-frontend · Next.js</span>
+      <span class="badge badge-gray">nucleus_dev · AWS RDS · MSSQL</span>
+    </div>
+    <h1>Atoms — Manufacturing Stages CRUD</h1>
+    <p class="hero-desc">
+      The Manufacturing Stages section inside <strong>Product Details → Project Management → Atoms tab</strong> was previously read-only.
+      This implementation makes all 4 stages fully interactive — create, read, update, and delete — writing directly to the database.
+      Uses Notion-style inline editing with no modals.
+    </p>
+    <div class="hero-grid">
+      <div class="hero-pill">
+        <div class="hero-pill-label">Live Product</div>
+        <div class="hero-pill-val">Hippuric Acid (Olive Oil)</div>
+      </div>
+      <div class="hero-pill">
+        <div class="hero-pill-label">CAS / Project ID</div>
+        <div class="hero-pill-val">8001-25-0 / 1699</div>
+      </div>
+      <div class="hero-pill">
+        <div class="hero-pill-label">Project Status</div>
+        <div class="hero-pill-val">Commercialized</div>
+      </div>
+      <div class="hero-pill">
+        <div class="hero-pill-label">Project Stage</div>
+        <div class="hero-pill-val">Demand Generation</div>
+      </div>
+    </div>
+    <div class="url-label">Page URL (tested on)</div>
+    <div class="url-box">http://localhost:3000/nucleus_hub/product-details?productID=796&amp;projectID=1699 → Project Management → Atoms</div>
+  </div>
+
+  <!-- ═══════════════════ 4 STAGES OVERVIEW ═══════════════════ -->
+  <div class="section">
+    <div class="section-head">
+      <h2>4 Manufacturing Stages</h2>
+      <span class="badge badge-gray" style="margin-left:auto">All stages now CRUD</span>
+    </div>
+    <div class="section-body">
+      <div class="stage-grid">
+        <div class="stage-card">
+          <div class="stage-num">Stage 1</div>
+          <div class="stage-title">Supply Identification</div>
+          <div class="stage-desc">Supplier list with location and Norms &amp; JW Cost. Inline add / edit / delete with live search from account_master (4500+ records).</div>
+        </div>
+        <div class="stage-card">
+          <div class="stage-num">Stage 2</div>
+          <div class="stage-title">Supply Finalization</div>
+          <div class="stage-desc">Select one supplier from Stage 1 to finalize. Click radio → backend resets all → marks selected as FINALIZED with date.</div>
+        </div>
+        <div class="stage-card">
+          <div class="stage-num">Stage 3</div>
+          <div class="stage-title">Demand Generation</div>
+          <div class="stage-desc">Two independent inline tables: Sales Reachout (customer outreach records) + Digital Marketing entries. Parent demand_generation record auto-created.</div>
+        </div>
+        <div class="stage-card">
+          <div class="stage-num">Stage 4</div>
+          <div class="stage-title">Commercialization</div>
+          <div class="stage-desc">Manufacturing Agreement (upsert) + Production Details table + Sales Orders table. Supplier auto-assigned from finalized supplier. Totals shown below each table.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ LIVE DATA FROM PAGE ═══════════════════ -->
+  <div class="section">
+    <div class="section-head">
+      <h2>Live Data — What's on the Page (productID=796 / projectID=1699)</h2>
+      <span class="live-dot" style="margin-left:auto"></span>
+    </div>
+    <div class="section-body">
+
+      <!-- Stage 1 -->
+      <div class="stage-expanded">
+        <div class="stage-expanded-head">
+          <div class="stage-expanded-head-left">
+            <span style="color:#6c47d9;font-size:13px">▼</span>
+            <span class="stage-label">Stage 1 — Supply Identification</span>
+          </div>
+          <span class="badge badge-gray">Pending</span>
+        </div>
+        <div class="stage-expanded-body">
+          <table class="data-table">
+            <thead><tr><th>Company Name</th><th>Location</th><th>Norms &amp; JW Cost</th></tr></thead>
+            <tbody>
+              <tr><td class="primary">Altrakem Pharma Lifesciences Pvt. Ltd</td><td>Hyderabad, Telangana, India</td><td style="color:var(--text3)">—</td></tr>
+              <tr><td class="primary">Himalaya Carbon (India)</td><td>Teh, Hoshiarpur, Punjab, India</td><td style="color:var(--text3)">—</td></tr>
+            </tbody>
+          </table>
+          <div class="ui-note">ℹ Each row has an inline Edit (click row) and Delete (trash icon) action. "+ Add supplier" triggers search dropdown.</div>
+        </div>
+      </div>
+
+      <!-- Stage 2 -->
+      <div class="stage-expanded">
+        <div class="stage-expanded-head">
+          <div class="stage-expanded-head-left">
+            <span style="color:#1a7a4a;font-size:13px">▼</span>
+            <span class="stage-label">Stage 2 — Supply Finalization</span>
+          </div>
+          <span class="badge badge-gray">Pending</span>
+        </div>
+        <div class="stage-expanded-body">
+          <p style="font-size:12px;color:var(--text3);margin-bottom:10px">Select one supplier from the identified list to finalize.</p>
+          <table class="data-table">
+            <thead><tr><th width="36"></th><th>Company Name</th><th>Location</th><th>Norms &amp; JW Cost</th></tr></thead>
+            <tbody>
+              <tr>
+                <td style="color:var(--green);font-size:16px;text-align:center">✓</td>
+                <td><span class="finalized-name">Altrakem Pharma Lifesciences Pvt. Ltd</span><span class="finalized-badge">Finalized</span></td>
+                <td>Hyderabad, Telangana, India</td>
+                <td style="color:var(--text3)">—</td>
+              </tr>
+              <tr>
+                <td style="text-align:center"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border-mid)"></span></td>
+                <td>Himalaya Carbon (India)</td>
+                <td>Teh, Hoshiarpur, Punjab, India</td>
+                <td style="color:var(--text3)">—</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="ui-note">ℹ Clicking a row calls /finalize API. Backend: resets all suppliers to IDENTIFIED → marks selected as FINALIZED with finalized_date = GETDATE().</div>
+        </div>
+      </div>
+
+      <!-- Stage 3 -->
+      <div class="stage-expanded">
+        <div class="stage-expanded-head">
+          <div class="stage-expanded-head-left">
+            <span style="color:#1a5fa8;font-size:13px">▼</span>
+            <span class="stage-label">Stage 3 — Demand Generation</span>
+          </div>
+          <span class="badge badge-gray">Pending</span>
+        </div>
+        <div class="stage-expanded-body">
+          <p style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">Sales Reachout</p>
+          <table class="data-table" style="margin-bottom:16px">
+            <thead><tr><th>Customer Name</th><th>Price/Grade Expectation</th><th>Converted?</th><th>BU Comments</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="primary">Pharma Test Customer</td><td>Rs 500/kg Grade A</td><td>No</td><td>Sample shared, awaiting feedback</td><td style="color:var(--text3)">—</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">Digital Marketing</p>
+          <table class="data-table">
+            <thead><tr><th>Mode of Marketing</th><th>Buyer Name</th><th>Converted?</th><th>Marketing Notes</th><th>BU Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="primary">LinkedIn Campaign</td><td>Ravi Kumar</td><td>No</td><td>Targeted ads for pharma buyers in India</td><td>Approved by BU head</td></tr>
+            </tbody>
+          </table>
+          <div class="ui-note">ℹ Both tables share the same demand_generation parent (auto-created on first save). Required fields: Customer Name (Sales Reachout), Mode of Marketing (Digital Marketing).</div>
+        </div>
+      </div>
+
+      <!-- Stage 4 -->
+      <div class="stage-expanded">
+        <div class="stage-expanded-head">
+          <div class="stage-expanded-head-left">
+            <span style="color:#9a6200;font-size:13px">▼</span>
+            <span class="stage-label">Stage 4 — Commercialization</span>
+          </div>
+          <span class="badge badge-gray">Pending</span>
+        </div>
+        <div class="stage-expanded-body">
+          <p style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">Manufacturing Agreement <span class="badge badge-gray" style="vertical-align:middle;margin-left:6px">Edit</span></p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+            <div class="hero-pill"><div class="hero-pill-label">Status</div><div class="hero-pill-val" style="color:var(--green)">SIGNED</div></div>
+            <div class="hero-pill"><div class="hero-pill-label">Exclusivity</div><div class="hero-pill-val">Exclusive</div></div>
+            <div class="hero-pill"><div class="hero-pill-label">Campaign Qty</div><div class="hero-pill-val">5 MT</div></div>
+            <div class="hero-pill"><div class="hero-pill-label">Value</div><div class="hero-pill-val">Rs 25.00 Lakhs</div></div>
+            <div class="hero-pill"><div class="hero-pill-label">Start Date</div><div class="hero-pill-val">1 Jul 2026</div></div>
+            <div class="hero-pill"><div class="hero-pill-label">End Date</div><div class="hero-pill-val">31 Dec 2026</div></div>
+          </div>
+          <p style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">Production Details</p>
+          <table class="data-table" style="margin-bottom:10px">
+            <thead><tr><th>Supplier</th><th>Qty</th><th>UOM</th><th>Start Date</th><th>Campaign</th></tr></thead>
+            <tbody>
+              <tr><td class="primary">Himalaya Carbon (India)</td><td>5000</td><td>kg</td><td>15 Jul 2026</td><td>Campaign 1</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:12px;color:var(--text2);margin-bottom:14px;font-weight:600">Total: 5000 kg</p>
+          <p style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">Sales Details (Orders)</p>
+          <table class="data-table" style="margin-bottom:10px">
+            <thead><tr><th>Customer</th><th>Qty</th><th>UOM</th><th>Order Value</th><th>CM1%</th><th>Sales Spoc</th><th>Status</th><th>Received Date</th></tr></thead>
+            <tbody>
+              <tr><td style="color:var(--text3)">—</td><td>2000</td><td>kg</td><td>1,200,000</td><td>18%</td><td>Vamsi K</td><td><span class="badge badge-green">Confirmed</span></td><td>1 Aug 2026</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:12px;color:var(--text2);font-weight:600">Total Sales Qty: 2000 kg &nbsp;|&nbsp; Total Order Value: Rs 12.00 Lakhs</p>
+          <div class="ui-note">ℹ Supplier in Production Details is auto-populated from finalized supplier — not user-editable. Customer name in Orders is matched against account_master for customer_id linkage.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════ DATABASE TABLES ═══════════════════ -->
+  <div class="section">
+    <div class="section-head"><h2>Database Tables — nucleus_dev</h2></div>
+    <div class="section-body" style="padding:0">
+      <table class="data-table">
+        <thead>
+          <tr><th>Table</th><th>Stage(s)</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono">dbo.account_master</td><td class="stage-col">1</td><td>Supplier master — 4500+ records. Used for search and new supplier creation.</td></tr>
+          <tr><td class="mono">dbo.project_supplier_details</td><td class="stage-col">1, 2</td><td>Project–supplier linkage with status, location, norms, finalization info. <code>is_finalized_supplier</code> boolean — only one = 1 per project.</td></tr>
+          <tr><td class="mono">dbo.project_demand_generation</td><td class="stage-col">3</td><td>Parent container per project for demand generation. Auto-created by backend. <code>demand_source</code> defaults to 'MANUAL'.</td></tr>
+          <tr><td class="mono">dbo.project_sales_reachout</td><td class="stage-col">3</td><td>Customer reachout records. Child of project_demand_generation.</td></tr>
+          <tr><td class="mono">dbo.project_digital_marketing</td><td class="stage-col">3</td><td>Digital marketing entries. Child of project_demand_generation. Both share same demand_id.</td></tr>
+          <tr><td class="mono">dbo.project_manufacturing_agreement</td><td class="stage-col">4</td><td>Single manufacturing agreement per project. Upsert pattern — one endpoint creates or updates.</td></tr>
+          <tr><td class="mono">dbo.project_production_details</td><td class="stage-col">4</td><td>Production batch records linked to agreement. Supplier auto-assigned from agreement.</td></tr>
+          <tr><td class="mono">dbo.project_orders</td><td class="stage-col">4</td><td>Sales order records linked to agreement. customer_id resolved from account_master by name.</td></tr>
+          <tr><td class="mono">dbo.fact_project_stage</td><td class="stage-col">All</td><td>Stage status tracking — PENDING / IN_PROGRESS / COMPLETED. Upserted on every status change.</td></tr>
+          <tr><td class="mono">dbo.dim_stage</td><td class="stage-col">All</td><td>Stage master — stage names and IDs. Read-only reference. Stage IDs: 1–4.</td></tr>
+          <tr><td class="mono">dbo.dim_sub_stage</td><td class="stage-col">All</td><td>Sub-stage master. Read-only reference.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ BACKEND APIs ═══════════════════ -->
+  <div class="section">
+    <div class="section-head">
+      <h2>Backend APIs</h2>
+      <span class="badge badge-gray" style="margin-left:auto;font-family:monospace">atoms_projects.py · port 8002</span>
+    </div>
+    <div class="section-body">
+      <p style="font-size:12px;color:var(--text3);margin-bottom:1rem">All endpoints have matching OPTIONS preflight handlers for CORS. * = required field.</p>
+
+      <div class="api-group">
+        <div class="api-group-title">Suppliers (global)</div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method get">GET</span><span class="api-endpoint">/api/suppliers/search?q=&lt;term&gt;&amp;limit=&lt;n&gt;</span></div>
+          <div class="api-note">Returns matching suppliers from account_master. Used for inline search dropdown.</div>
+        </div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method post">POST</span><span class="api-endpoint">/api/suppliers</span></div>
+          <div class="api-note">body: { name*, location? } → { supplier_id }. Inserts into account_master. supplier_type / existing_supplier / is_valid intentionally left NULL.</div>
+        </div>
+      </div>
+
+      <div class="api-group">
+        <div class="api-group-title">Stage 1 — Supply Identification</div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method post">POST</span><span class="api-endpoint">/api/atoms-projects/{project_id}/suppliers</span></div>
+          <div class="api-note">body: { supplier_id*, supplier_location?, reasons_for_selection? }. Checks for duplicate supplier before insert. Sets status = IDENTIFIED.</div>
+        </div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method put">PUT</span><span class="api-endpoint">/api/atoms-projects/{project_id}/suppliers/{project_supplier_id}</span></div>
+          <div class="api-note">Updates supplier_location and reasons_for_selection only. Company name not editable (comes from account_master).</div>
+        </div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method del">DEL</span><span class="api-endpoint">/api/atoms-projects/{project_id}/suppliers/{project_supplier_id}</span></div>
+          <div class="api-note">Blocked with error if is_finalized_supplier = 1.</div>
+        </div>
+      </div>
+
+      <div class="api-group">
+        <div class="api-group-title">Stage 2 — Supply Finalization</div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method put">PUT</span><span class="api-endpoint">/api/atoms-projects/{project_id}/suppliers/{project_supplier_id}/finalize</span></div>
+          <div class="api-note">Transaction: resets all project suppliers → IDENTIFIED, then marks selected → FINALIZED with finalized_date = GETDATE().</div>
+        </div>
+      </div>
+
+      <div class="api-group">
+        <div class="api-group-title">Stage Status (all stages)</div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method put">PUT</span><span class="api-endpoint">/api/atoms-projects/{project_id}/stage-status</span></div>
+          <div class="api-note">body: { stage_id, stage_status }. Values: PENDING / IN_PROGRESS / COMPLETED. Upserts fact_project_stage. Sets is_current=1 for IN_PROGRESS, 0 for others.</div>
+        </div>
+      </div>
+
+      <div class="api-group">
+        <div class="api-group-title">Stage 3 — Demand Generation: Sales Reachout</div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method post">POST</span><span class="api-endpoint">/api/atoms-projects/{project_id}/demand-generation/sales-reachout</span></div>
+          <div class="api-note">Required: customer_name. Optional: price_grade_expectation, bu_comments, is_converted, reachout_notes, delivered_quantity.</div>
+        </div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method put">PUT</span><span class="api-endpoint">/api/atoms-projects/{project_id}/demand-generation/sales-reachout/{id}</span></div>
+          <div class="api-note">Verifies row belongs to project via JOIN before UPDATE.</div>
+        </div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method del">DEL</span><span class="api-endpoint">/api/atoms-projects/{project_id}/demand-generation/sales-reachout/{id}</span></div>
+        </div>
+      </div>
+
+      <div class="api-group">
+        <div class="api-group-title">Stage 3 — Demand Generation: Digital Marketing</div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method post">POST</span><span class="api-endpoint">/api/atoms-projects/{project_id}/demand-generation/digital-marketing</span></div>
+          <div class="api-note">Required: mode_of_marketing. Optional: buyer_name, marketing_notes, bu_notes, is_converted, order_link.</div>
+        </div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method put">PUT</span><span class="api-endpoint">/api/atoms-projects/{project_id}/demand-generation/digital-marketing/{id}</span></div>
+        </div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method del">DEL</span><span class="api-endpoint">/api/atoms-projects/{project_id}/demand-generation/digital-marketing/{id}</span></div>
+        </div>
+      </div>
+
+      <div class="api-group">
+        <div class="api-group-title">Stage 4 — Commercialization: Manufacturing Agreement</div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method post">POST</span><span class="api-endpoint">/api/atoms-projects/{project_id}/manufacturing-agreement</span></div>
+          <div class="api-note">Upsert — creates if none exists, updates otherwise. Required: agreement_status. Optional: exclusivity, campaign_quantity, agreement_value, production_start_date, production_end_date, agreement_attachment, agreement_notes.</div>
+        </div>
+      </div>
+
+      <div class="api-group">
+        <div class="api-group-title">Stage 4 — Commercialization: Production Details</div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method post">POST</span><span class="api-endpoint">/api/atoms-projects/{project_id}/production-details</span></div>
+          <div class="api-note">Optional: production_quantity, production_start_date, uom, campaign. Supplier auto-assigned from finalized supplier — not user-editable.</div>
+        </div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method put">PUT</span><span class="api-endpoint">/api/atoms-projects/{project_id}/production-details/{id}</span></div>
+        </div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method del">DEL</span><span class="api-endpoint">/api/atoms-projects/{project_id}/production-details/{id}</span></div>
+        </div>
+      </div>
+
+      <div class="api-group">
+        <div class="api-group-title">Stage 4 — Commercialization: Orders</div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method post">POST</span><span class="api-endpoint">/api/atoms-projects/{project_id}/orders</span></div>
+          <div class="api-note">Optional: customer_name, order_quantity, order_value, cm1_margin, sales_spoc, order_status, order_received_date, order_closure_date, order_notes, uom. Customer name matched against account_master for customer_id.</div>
+        </div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method put">PUT</span><span class="api-endpoint">/api/atoms-projects/{project_id}/orders/{order_id}</span></div>
+        </div>
+        <div class="api-row">
+          <div class="api-sig"><span class="method del">DEL</span><span class="api-endpoint">/api/atoms-projects/{project_id}/orders/{order_id}</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════ FRONTEND FILES ═══════════════════ -->
+  <div class="section">
+    <div class="section-head"><h2>Frontend — Files Changed</h2></div>
+    <div class="section-body">
+      <div class="file-row">
+        <div class="file-path">lib/nucleus_hub_api.ts</div>
+        <div class="file-desc">New TypeScript types: SalesReachoutPayload, DigitalMarketingPayload, ManufacturingAgreementPayload, ProductionDetailPayload, OrderPayload. Added all CRUD API functions for every endpoint. Also includes searchSuppliers, createSupplier, addProjectSupplier, updateProjectSupplier, deleteProjectSupplier, updateStageStatus, finalizeSupplier.</div>
+      </div>
+      <div class="file-row">
+        <div class="file-path">components/nucleus-hub/AtomsManufacturingStages.tsx</div>
+        <div class="file-desc">Core component — fully rewritten. All 4 stages converted from read-only display to interactive CRUD. Key state: supplierRows, editingRowId, dropdownPosition (for fixed-position portal), salesReachoutRows, digitalMarketingRows, productionRows, orderRows, agreementDraft, editingAgreement, isSaving, deletingId, updatingStageId, finalizingId. Props: productID, projectID, openStages, handleStageToggle, currentUserEmail, projectOwnerEmail, createdBy, managerEmail, assignee1Email, assignee2Email, isAdminUser.</div>
+      </div>
+      <div class="file-row">
+        <div class="file-path">app/(dashboard)/nucleus_hub/product-details/page.tsx</div>
+        <div class="file-desc">Passes all permission props to AtomsManufacturingStages. isAdminUser check updated from role === "ADMIN" only → ["ADMIN", "MANAGER"].includes(role) for department_id === 7 (Control Tower), so Control Tower Managers also get write access.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ PERMISSION MODEL ═══════════════════ -->
+  <div class="section">
+    <div class="section-head"><h2>Permission Model — canEdit</h2></div>
+    <div class="section-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">Computed from email matching against project assignment data already loaded on the page — no separate permissions table needed. <code style="font-family:var(--mono);background:var(--surface2);padding:1px 5px;border-radius:4px">isAdminUser</code> = role ADMIN or MANAGER within department_id = 7 (Control Tower).</p>
+      <div class="perm-grid">
+        <div class="perm-row"><span class="perm-label">Project Owner (projectOwnerEmail)</span><span class="perm-yes">✓ Edit</span></div>
+        <div class="perm-row"><span class="perm-label">Control Tower Admin (dept 7, role = ADMIN)</span><span class="perm-yes">✓ Edit</span></div>
+        <div class="perm-row"><span class="perm-label">Control Tower Manager (dept 7, role = MANAGER)</span><span class="perm-yes">✓ Edit</span></div>
+        <div class="perm-row"><span class="perm-label">Project Manager (managerEmail)</span><span class="perm-yes">✓ Edit</span></div>
+        <div class="perm-row"><span class="perm-label">Assignee 1 (assignee1Email)</span><span class="perm-yes">✓ Edit</span></div>
+        <div class="perm-row"><span class="perm-label">Created By (createdBy)</span><span class="perm-yes">✓ Edit</span></div>
+        <div class="perm-row"><span class="perm-label">Assignee 2 (assignee2Email)</span><span class="perm-no">✗ Read only <span class="perm-readonly">no add / edit / delete</span></span></div>
+        <div class="perm-row"><span class="perm-label">All other users</span><span class="perm-no">✗ Read only <span class="perm-readonly">no add / edit / delete</span></span></div>
+      </div>
+      <div class="ui-note" style="margin-top:12px">ℹ When canEdit = false: + Add rows hidden, trash icons hidden, stage status is static badge (not dropdown), clicking rows does nothing.</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ AUTO-CREATION LOGIC ═══════════════════ -->
+  <div class="section">
+    <div class="section-head"><h2>Auto-Creation Logic — Silent Parent Records</h2></div>
+    <div class="section-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">Two backend helpers silently create required parent rows so the frontend never needs to — the user just adds child data and the backend handles the rest.</p>
+      <div class="auto-card">
+        <div class="auto-card-title">_get_or_create_demand_generation(conn, project_id)</div>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:6px">Triggered when adding any Sales Reachout or Digital Marketing entry.</p>
+        <ol class="auto-steps">
+          <li>Check if project_demand_generation exists for project_id</li>
+          <li>If yes → return demand_id</li>
+          <li>If no → find finalized supplier (falls back to any supplier if none finalized)</li>
+          <li>INSERT with demand_source='MANUAL', created_by=1</li>
+          <li>Return new demand_id</li>
+        </ol>
+      </div>
+      <div class="auto-card">
+        <div class="auto-card-title">_get_or_create_agreement(conn, project_id)</div>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:6px">Triggered when adding any Production Detail or Order entry.</p>
+        <ol class="auto-steps">
+          <li>Check if project_manufacturing_agreement exists for project_id</li>
+          <li>If yes → return agreement_id</li>
+          <li>If no → find finalized supplier</li>
+          <li>INSERT stub with agreement_status='DRAFT', created_by=1</li>
+          <li>Return new agreement_id</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ KEY DESIGN DECISIONS ═══════════════════ -->
+  <div class="section">
+    <div class="section-head"><h2>Key Design Decisions</h2></div>
+    <div class="section-body">
+      <div class="decision-row"><span class="decision-key">Inline editing — no modals</span><span class="decision-val">Notion-style UX as requested — fast, in-context editing without interrupting the page flow.</span></div>
+      <div class="decision-row"><span class="decision-key">Supplier dropdown as fixed portal</span><span class="decision-val">Dropdown rendered with <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:3px">position:fixed</code> + getBoundingClientRect to prevent clipping inside overflow-x-auto table containers.</span></div>
+      <div class="decision-row"><span class="decision-key">Parent records auto-created</span><span class="decision-val">supplier_id and demand_source are NOT NULL in demand_generation — can't be left to the user. Backend handles it transparently.</span></div>
+      <div class="decision-row"><span class="decision-key">New supplier: NULLs on type/valid cols</span><span class="decision-val">supplier_type, existing_supplier, is_valid intentionally left NULL. No defaults should be assumed for suppliers created from this flow.</span></div>
+      <div class="decision-row"><span class="decision-key">Finalization resets all, then marks one</span><span class="decision-val">Guarantees at the DB level that only one supplier per project is ever FINALIZED at a time. Atomic transaction.</span></div>
+      <div class="decision-row"><span class="decision-key">canEdit computed from email matching</span><span class="decision-val">No separate permissions table needed — uses existing project assignment data already loaded on the page.</span></div>
+      <div class="decision-row"><span class="decision-key">MANAGER included in isAdminUser</span><span class="decision-val">Control Tower Managers need write access, not just Admins. Updated check: ["ADMIN","MANAGER"].includes(role) for department_id = 7.</span></div>
+      <div class="decision-row"><span class="decision-key">Agreement uses upsert — single endpoint</span><span class="decision-val">Only one manufacturing agreement per project. One endpoint handles both create and update — simpler than separate create/update flows.</span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Branch: <code>feature/atoms-project-management-crud</code> &nbsp;·&nbsp;
+    Repos: <code>Nucleus-hub</code> (FastAPI) &amp; <code>sourcing-frontend</code> (Next.js) &nbsp;·&nbsp;
+    DB: <code>nucleus_dev</code> on AWS RDS (MSSQL) &nbsp;·&nbsp;
+    Status: Implementation complete · Pending review &amp; merge
+  </div>
+
+</div>
+</body>
+</html>
